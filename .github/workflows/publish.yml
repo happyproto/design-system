@@ -1,0 +1,42 @@
+name: Publish
+
+# Prerequisite, one-time, by hand: the very first publish of this package
+# cannot use OIDC trusted publishing, because npm's trusted-publisher config
+# is set on a package that must already exist. The package must be published
+# once by hand, and a GitHub Actions trusted publisher registered on
+# npmjs.com for this repo and this workflow filename, before any tag push
+# can succeed. Task 6 does this bootstrap publish, in that order.
+
+on:
+  push:
+    tags: ['v[0-9]*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      # Fail fast: the tag drives the trigger but nothing else reads it, so
+      # without this a tag mismatching package.json's version would publish
+      # the wrong version, and the *next* tag would then fail with an error
+      # naming a version that appears in no tag.
+      - name: Tag must match package version
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          [ "$pkg" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != $pkg"; exit 1; }
+      - uses: oven-sh/setup-bun@v2
+      # Arbitrary lifecycle scripts should not run while this job holds
+      # id-token: write.
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun test
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.20.0'
+          registry-url: 'https://registry.npmjs.org'
+      # Node 24.20.0 bundles npm 11.19.0, which already clears the 11.5.1+
+      # that OIDC trusted publishing needs, so no separate npm upgrade step
+      # is required (Node 22 bundles npm 10.9.8, which is why one existed).
+      - run: npm publish

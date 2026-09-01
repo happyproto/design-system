@@ -1,0 +1,43 @@
+name: Storybook
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Only one deployment at a time; never cancel one midway.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      # This does NOT turn Pages on — enablement defaults to false, so with
+      # no `with:` block it enables nothing. Pages source must be set to
+      # "GitHub Actions" in this repo's Settings → Pages once, by hand,
+      # before the first run; this step only reads that existing config.
+      # Placed before the build so a missing/misconfigured source fails in
+      # seconds rather than after the slowest step in the job.
+      - uses: actions/configure-pages@v6
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile --ignore-scripts
+      # Tokens gate the deploy too: a Storybook showing a palette that fails
+      # AAA would be a design review conducted on a lie.
+      - run: bun test
+      - run: bun run build-storybook
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: storybook-static
+      - id: deployment
+        uses: actions/deploy-pages@v5
