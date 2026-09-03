@@ -1,39 +1,74 @@
 /**
- * Design tokens for the HappyProto control plane.
+ * Token values mirrored for JS consumers.
  *
- * PROVISIONAL VALUES. The token *names* are the public API and are settled;
- * the color and type values are replaced by the designed language before
- * 1.0.0 is published. Do not build a palette on top of these.
+ * `tokens.css` is the source of truth for theming; this object exists for
+ * tooling that needs values without a DOM, and carries the LIGHT theme.
+ * tests/tokens.test.ts asserts every name and every color value here matches
+ * the `:root` block, so the two cannot drift.
  */
 export const tokens = {
   color: {
-    bg: "oklch(0.99 0 0)",
-    surface: "oklch(1 0 0)",
-    "surface-raised": "oklch(0.97 0 0)",
+    bg: "oklch(1 0 0)",
+    surface: "oklch(0.985 0 0)",
+    "surface-raised": "oklch(0.965 0 0)",
     border: "oklch(0.90 0 0)",
-    "border-strong": "oklch(0.80 0 0)",
+    "border-strong": "oklch(0.78 0 0)",
     fg: "oklch(0.20 0 0)",
-    "fg-muted": "oklch(0.44 0 0)",
-    // L=0.42, not a mid-tone: white text on a mid-blue accent reaches only
-    // 4.85:1, well under AAA. An accent that carries white text at 7:1 has
-    // to be this dark. C=0.118, not 0.15, because 0.15 at this lightness
-    // falls outside sRGB (r < 0). Measured, not guessed.
-    accent: "oklch(0.42 0.118 250)",
+    "fg-muted": "oklch(0.435 0 0)",
+    accent: "oklch(0.432 0.076 223.1)",
     "accent-fg": "oklch(1 0 0)",
-    success: "oklch(0.426 0.115 150)",
-    warning: "oklch(0.442 0.09 75)",
-    danger: "oklch(0.461 0.18 25)",
-    "chart-1": "oklch(0.368 0.155 265)",
-    "chart-2": "oklch(0.434 0.155 15)",
-    "chart-3": "oklch(0.468 0.091 100)",
-    "chart-4": "oklch(0.516 0.084 210)",
-    "chart-5": "oklch(0.596 0.155 300)",
-    "chart-6": "oklch(0.649 0.143 60)",
+    "accent-surface": "oklch(0.668 0.111 223.1)",
+    "accent-surface-fg": "oklch(0.10 0 0)",
+    "accent-alt": "oklch(0.442 0.091 69.1)",
+    "accent-alt-fg": "oklch(1 0 0)",
+    "accent-alt-surface": "oklch(0.787 0.171 69.1)",
+    "accent-alt-surface-fg": "oklch(0.20 0 0)",
+    success: "oklch(0.426 0.11 150)",
+    warning: "oklch(0.442 0.088 75)",
+    danger: "oklch(0.46 0.175 25)",
+    "chart-1": "oklch(0.272 0.049 223.1)",
+    "chart-2": "oklch(0.36 0.075 69.1)",
+    "chart-3": "oklch(0.42 0.075 223.1)",
+    "chart-4": "oklch(0.5 0.105 69.1)",
+    "chart-5": "oklch(0.556 0.099 223.1)",
+    "chart-6": "oklch(0.642 0.134 69.1)",
+  },
+  shadow: {
+    ambient: "0 1px 2px rgb(0 0 0 / 0.05), 0 2px 8px rgb(0 0 0 / 0.04)",
+    overlay: "0 4px 12px rgb(0 0 0 / 0.10), 0 12px 32px rgb(0 0 0 / 0.07)",
+    modal: "0 8px 24px rgb(0 0 0 / 0.14), 0 24px 64px rgb(0 0 0 / 0.10)",
   },
   font: {
-    sans: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    sans: "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif",
     mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
-    display: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+    numeric: "tabular-nums",
+  },
+  text: {
+    xs: "0.75rem",
+    sm: "0.875rem",
+    base: "1rem",
+    lg: "1.125rem",
+    xl: "1.375rem",
+    "2xl": "1.75rem",
+    "3xl": "2.25rem",
+    "4xl": "3rem",
+    "5xl": "3.75rem",
+  },
+  weight: {
+    regular: "400",
+    medium: "500",
+    semibold: "600",
+  },
+  leading: {
+    tight: "1.2",
+    snug: "1.35",
+    normal: "1.55",
+    relaxed: "1.7",
+  },
+  tracking: {
+    tight: "-0.02em",
+    normal: "0em",
+    wide: "0.02em",
   },
   space: {
     "1": "0.25rem",
@@ -44,7 +79,19 @@ export const tokens = {
     "8": "2rem",
     "12": "3rem",
   },
-  radius: { sm: "0.25rem", md: "0.5rem", lg: "0.75rem" },
+  radius: {
+    sm: "3px",
+    md: "6px",
+    lg: "10px",
+  },
+  z: {
+    dropdown: "10",
+    sticky: "20",
+    "modal-backdrop": "30",
+    modal: "40",
+    toast: "50",
+    tooltip: "60",
+  },
   motion: {
     "duration-fast": "120ms",
     "duration-base": "200ms",

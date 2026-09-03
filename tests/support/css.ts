@@ -50,3 +50,31 @@ export function declarations(block: string): Record<string, string> {
   }
   return out;
 }
+
+/**
+ * Like `extractBlock`, but matches at ANY nesting depth.
+ *
+ * `extractBlock` deliberately counts only top-level rules, so it cannot see a
+ * selector nested inside an at-rule. The dark theme is defined twice — once
+ * under `@media (prefers-color-scheme: dark)` and once under
+ * `[data-theme="dark"]` — and the nested copy needs checking too, or the
+ * duplication is unguarded. Still throws unless the selector appears exactly
+ * once, for the same reason: returning nothing quietly is how a test comes to
+ * assert nothing at all.
+ */
+export function extractNestedBlock(css: string, selector: string): string {
+  const clean = stripComments(css);
+  const re = new RegExp(String.raw`(?:^|[}\s;])${escapeRegExp(selector)}\s*\{`, "g");
+  const opens = [...clean.matchAll(re)].map((m) => m.index! + m[0].length - 1);
+  if (opens.length !== 1) {
+    throw new Error(
+      `expected exactly one \`${selector}\` rule at any depth, found ${opens.length}`,
+    );
+  }
+  let depth = 0;
+  for (let i = opens[0]; i < clean.length; i++) {
+    if (clean[i] === "{") depth++;
+    else if (clean[i] === "}" && --depth === 0) return clean.slice(opens[0] + 1, i);
+  }
+  throw new Error(`unbalanced braces in \`${selector}\``);
+}

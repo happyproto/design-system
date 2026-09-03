@@ -1,30 +1,77 @@
-/* PROVISIONAL VALUES — see src/tokens.ts. Names are the public API. */
+/* HappyProto design tokens.
+ *
+ * Token NAMES are the public API; renaming one is a major version.
+ * Every color here is gated by tests/contrast.test.ts — see docs/colour-constraints.md.
+ *
+ * Theming follows the system by default; an explicit data-theme wins:
+ *   <html data-theme="dark">   forces dark
+ *   <html data-theme="light">  forces light
+ * The dark values appear twice — under the media query and under
+ * [data-theme="dark"]. tests/tokens.test.ts asserts the two are identical,
+ * so they cannot drift apart.
+ */
 :root {
-  --hp-color-bg: oklch(0.99 0 0);
-  --hp-color-surface: oklch(1 0 0);
-  --hp-color-surface-raised: oklch(0.97 0 0);
-  --hp-color-border: oklch(0.9 0 0);
-  --hp-color-border-strong: oklch(0.8 0 0);
-  --hp-color-fg: oklch(0.2 0 0);
-  --hp-color-fg-muted: oklch(0.44 0 0);
-  /* L=0.42: white text on a mid-blue accent is only 4.85:1, under AAA.
-     C=0.118, not 0.15: at this lightness 0.15 falls outside sRGB (r < 0),
-     so it is a color no display can render. */
-  --hp-color-accent: oklch(0.42 0.118 250);
-  --hp-color-accent-fg: oklch(1 0 0);
-  --hp-color-success: oklch(0.426 0.115 150);
-  --hp-color-warning: oklch(0.442 0.09 75);
-  --hp-color-danger: oklch(0.461 0.18 25);
-  --hp-color-chart-1: oklch(0.368 0.155 265);
-  --hp-color-chart-2: oklch(0.434 0.155 15);
-  --hp-color-chart-3: oklch(0.468 0.091 100);
-  --hp-color-chart-4: oklch(0.516 0.084 210);
-  --hp-color-chart-5: oklch(0.596 0.155 300);
-  --hp-color-chart-6: oklch(0.649 0.143 60);
+  color-scheme: light dark;
 
-  --hp-font-sans: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --hp-color-bg: oklch(1 0 0);
+  --hp-color-surface: oklch(0.985 0 0);
+  --hp-color-surface-raised: oklch(0.965 0 0);
+  --hp-color-border: oklch(0.90 0 0);
+  --hp-color-border-strong: oklch(0.78 0 0);
+  --hp-color-fg: oklch(0.20 0 0);
+  --hp-color-fg-muted: oklch(0.435 0 0);
+  --hp-color-accent: oklch(0.432 0.076 223.1);
+  --hp-color-accent-fg: oklch(1 0 0);
+  --hp-color-accent-surface: oklch(0.668 0.111 223.1);
+  --hp-color-accent-surface-fg: oklch(0.10 0 0);
+  --hp-color-accent-alt: oklch(0.442 0.091 69.1);
+  --hp-color-accent-alt-fg: oklch(1 0 0);
+  --hp-color-accent-alt-surface: oklch(0.787 0.171 69.1);
+  --hp-color-accent-alt-surface-fg: oklch(0.20 0 0);
+  --hp-color-success: oklch(0.426 0.11 150);
+  --hp-color-warning: oklch(0.442 0.088 75);
+  --hp-color-danger: oklch(0.46 0.175 25);
+  --hp-color-chart-1: oklch(0.272 0.049 223.1);
+  --hp-color-chart-2: oklch(0.36 0.075 69.1);
+  --hp-color-chart-3: oklch(0.42 0.075 223.1);
+  --hp-color-chart-4: oklch(0.5 0.105 69.1);
+  --hp-color-chart-5: oklch(0.556 0.099 223.1);
+  --hp-color-chart-6: oklch(0.642 0.134 69.1);
+
+  --hp-shadow-ambient: 0 1px 2px rgb(0 0 0 / 0.05), 0 2px 8px rgb(0 0 0 / 0.04);
+  --hp-shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.10), 0 12px 32px rgb(0 0 0 / 0.07);
+  --hp-shadow-modal: 0 8px 24px rgb(0 0 0 / 0.14), 0 24px 64px rgb(0 0 0 / 0.10);
+
+  /* One family in several weights, per the product register. `numeric` is
+     applied as font-variant-numeric so figures do not jitter as they update. */
+  --hp-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --hp-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --hp-font-display: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --hp-font-numeric: tabular-nums;
+
+  /* Fixed rem steps, not fluid: a clamped heading that shrinks inside a
+     sidebar looks worse, not better. Reaches display sizes for marketing. */
+  --hp-text-xs: 0.75rem;
+  --hp-text-sm: 0.875rem;
+  --hp-text-base: 1rem;
+  --hp-text-lg: 1.125rem;
+  --hp-text-xl: 1.375rem;
+  --hp-text-2xl: 1.75rem;
+  --hp-text-3xl: 2.25rem;
+  --hp-text-4xl: 3rem;
+  --hp-text-5xl: 3.75rem;
+
+  --hp-weight-regular: 400;
+  --hp-weight-medium: 500;
+  --hp-weight-semibold: 600;
+
+  --hp-leading-tight: 1.2;
+  --hp-leading-snug: 1.35;
+  --hp-leading-normal: 1.55;
+  --hp-leading-relaxed: 1.7;
+
+  --hp-tracking-tight: -0.02em;
+  --hp-tracking-normal: 0em;
+  --hp-tracking-wide: 0.02em;
 
   --hp-space-1: 0.25rem;
   --hp-space-2: 0.5rem;
@@ -34,32 +81,89 @@
   --hp-space-8: 2rem;
   --hp-space-12: 3rem;
 
-  --hp-radius-sm: 0.25rem;
-  --hp-radius-md: 0.5rem;
-  --hp-radius-lg: 0.75rem;
+  --hp-radius-sm: 3px;
+  --hp-radius-md: 6px;
+  --hp-radius-lg: 10px;
+
+  /* Semantic layers. Never write an arbitrary z-index. */
+  --hp-z-dropdown: 10;
+  --hp-z-sticky: 20;
+  --hp-z-modal-backdrop: 30;
+  --hp-z-modal: 40;
+  --hp-z-toast: 50;
+  --hp-z-tooltip: 60;
 
   --hp-motion-duration-fast: 120ms;
   --hp-motion-duration-base: 200ms;
   --hp-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Follow the system, unless light is explicitly pinned. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --hp-color-bg: oklch(0.12 0 0);
+    --hp-color-surface: oklch(0.16 0 0);
+    --hp-color-surface-raised: oklch(0.20 0 0);
+    --hp-color-border: oklch(0.28 0 0);
+    --hp-color-border-strong: oklch(0.42 0 0);
+    --hp-color-fg: oklch(0.97 0 0);
+    --hp-color-fg-muted: oklch(0.72 0 0);
+    --hp-color-accent: oklch(0.79 0.138 223.1);
+    --hp-color-accent-fg: oklch(0.12 0 0);
+    --hp-color-accent-surface: oklch(0.28 0.049 223.1);
+    --hp-color-accent-surface-fg: oklch(0.97 0 0);
+    --hp-color-accent-alt: oklch(0.786 0.161 69.1);
+    --hp-color-accent-alt-fg: oklch(0.12 0 0);
+    --hp-color-accent-alt-surface: oklch(0.28 0.057 69.1);
+    --hp-color-accent-alt-surface-fg: oklch(0.97 0 0);
+    --hp-color-success: oklch(0.70 0.11 150);
+    --hp-color-warning: oklch(0.716 0.11 75);
+    --hp-color-danger: oklch(0.726 0.12 25);
+    --hp-color-chart-1: oklch(0.5 0.089 223.1);
+    --hp-color-chart-2: oklch(0.582 0.122 69.1);
+    --hp-color-chart-3: oklch(0.64 0.115 223.1);
+    --hp-color-chart-4: oklch(0.734 0.154 69.1);
+    --hp-color-chart-5: oklch(0.8 0.134 223.1);
+    --hp-color-chart-6: oklch(0.902 0.07 69.1);
+
+    --hp-shadow-ambient: 0 1px 2px rgb(0 0 0 / 0.40), 0 2px 8px rgb(0 0 0 / 0.30);
+    --hp-shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.55), 0 12px 32px rgb(0 0 0 / 0.40);
+    --hp-shadow-modal: 0 8px 24px rgb(0 0 0 / 0.65), 0 24px 64px rgb(0 0 0 / 0.50);
+  }
+}
+
+/* Explicit override, in either direction. */
 [data-theme="dark"] {
-  --hp-color-bg: oklch(0.17 0 0);
-  --hp-color-surface: oklch(0.21 0 0);
-  --hp-color-surface-raised: oklch(0.25 0 0);
-  --hp-color-border: oklch(0.32 0 0);
-  --hp-color-border-strong: oklch(0.44 0 0);
+  color-scheme: dark;
+
+  --hp-color-bg: oklch(0.12 0 0);
+  --hp-color-surface: oklch(0.16 0 0);
+  --hp-color-surface-raised: oklch(0.20 0 0);
+  --hp-color-border: oklch(0.28 0 0);
+  --hp-color-border-strong: oklch(0.42 0 0);
   --hp-color-fg: oklch(0.97 0 0);
-  --hp-color-fg-muted: oklch(0.749 0 0);
-  --hp-color-accent: oklch(0.747 0.13 250);
-  --hp-color-accent-fg: oklch(0.17 0 0);
-  --hp-color-success: oklch(0.75 0.13 150);
-  --hp-color-warning: oklch(0.8 0.13 75);
-  --hp-color-danger: oklch(0.765 0.135 25);
-  --hp-color-chart-1: oklch(0.541 0.155 265);
-  --hp-color-chart-2: oklch(0.607 0.155 45);
-  --hp-color-chart-3: oklch(0.637 0.109 180);
-  --hp-color-chart-4: oklch(0.71 0.139 100);
-  --hp-color-chart-5: oklch(0.77 0.138 230);
-  --hp-color-chart-6: oklch(0.855 0.075 35);
+  --hp-color-fg-muted: oklch(0.72 0 0);
+  --hp-color-accent: oklch(0.79 0.138 223.1);
+  --hp-color-accent-fg: oklch(0.12 0 0);
+  --hp-color-accent-surface: oklch(0.28 0.049 223.1);
+  --hp-color-accent-surface-fg: oklch(0.97 0 0);
+  --hp-color-accent-alt: oklch(0.786 0.161 69.1);
+  --hp-color-accent-alt-fg: oklch(0.12 0 0);
+  --hp-color-accent-alt-surface: oklch(0.28 0.057 69.1);
+  --hp-color-accent-alt-surface-fg: oklch(0.97 0 0);
+  --hp-color-success: oklch(0.70 0.11 150);
+  --hp-color-warning: oklch(0.716 0.11 75);
+  --hp-color-danger: oklch(0.726 0.12 25);
+  --hp-color-chart-1: oklch(0.5 0.089 223.1);
+  --hp-color-chart-2: oklch(0.582 0.122 69.1);
+  --hp-color-chart-3: oklch(0.64 0.115 223.1);
+  --hp-color-chart-4: oklch(0.734 0.154 69.1);
+  --hp-color-chart-5: oklch(0.8 0.134 223.1);
+  --hp-color-chart-6: oklch(0.902 0.07 69.1);
+
+  --hp-shadow-ambient: 0 1px 2px rgb(0 0 0 / 0.40), 0 2px 8px rgb(0 0 0 / 0.30);
+  --hp-shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.55), 0 12px 32px rgb(0 0 0 / 0.40);
+  --hp-shadow-modal: 0 8px 24px rgb(0 0 0 / 0.65), 0 24px 64px rgb(0 0 0 / 0.50);
 }

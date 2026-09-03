@@ -1,14 +1,21 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "allowImportingTsExtensions": false,
     "types": ["bun"]
   },
-  "include": ["src", "stories", "tests", ".storybook/**/*.ts", ".storybook/**/*.tsx"]
+  "include": [
+    "src",
+    "tests",
+    "stories",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
+  ]
 }

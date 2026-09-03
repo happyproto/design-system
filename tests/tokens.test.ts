@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { tokens } from "../src/index";
-import { declarations, extractBlock, stripComments } from "./support/css";
+import {
+  declarations,
+  extractBlock,
+  extractNestedBlock,
+  stripComments,
+} from "./support/css";
 
 const css = readFileSync(new URL("../src/tokens.css", import.meta.url), "utf8");
 const COLOUR_PREFIX = "--hp-color-";
@@ -67,6 +72,12 @@ const EXPECTED_TOKENS = [
   "--hp-color-fg-muted",
   "--hp-color-accent",
   "--hp-color-accent-fg",
+  "--hp-color-accent-surface",
+  "--hp-color-accent-surface-fg",
+  "--hp-color-accent-alt",
+  "--hp-color-accent-alt-fg",
+  "--hp-color-accent-alt-surface",
+  "--hp-color-accent-alt-surface-fg",
   "--hp-color-success",
   "--hp-color-warning",
   "--hp-color-danger",
@@ -76,9 +87,31 @@ const EXPECTED_TOKENS = [
   "--hp-color-chart-4",
   "--hp-color-chart-5",
   "--hp-color-chart-6",
+  "--hp-shadow-ambient",
+  "--hp-shadow-overlay",
+  "--hp-shadow-modal",
   "--hp-font-sans",
   "--hp-font-mono",
-  "--hp-font-display",
+  "--hp-font-numeric",
+  "--hp-text-xs",
+  "--hp-text-sm",
+  "--hp-text-base",
+  "--hp-text-lg",
+  "--hp-text-xl",
+  "--hp-text-2xl",
+  "--hp-text-3xl",
+  "--hp-text-4xl",
+  "--hp-text-5xl",
+  "--hp-weight-regular",
+  "--hp-weight-medium",
+  "--hp-weight-semibold",
+  "--hp-leading-tight",
+  "--hp-leading-snug",
+  "--hp-leading-normal",
+  "--hp-leading-relaxed",
+  "--hp-tracking-tight",
+  "--hp-tracking-normal",
+  "--hp-tracking-wide",
   "--hp-space-1",
   "--hp-space-2",
   "--hp-space-3",
@@ -89,6 +122,12 @@ const EXPECTED_TOKENS = [
   "--hp-radius-sm",
   "--hp-radius-md",
   "--hp-radius-lg",
+  "--hp-z-dropdown",
+  "--hp-z-sticky",
+  "--hp-z-modal-backdrop",
+  "--hp-z-modal",
+  "--hp-z-toast",
+  "--hp-z-tooltip",
   "--hp-motion-duration-fast",
   "--hp-motion-duration-base",
   "--hp-motion-ease",
@@ -149,8 +188,43 @@ describe("tokens", () => {
     expect(declared).toEqual([...EXPECTED_TOKENS].sort());
   });
 
+  test("both dark-theme definitions are identical", () => {
+    // The dark values are written twice: once so the theme follows the
+    // system, once so an explicit data-theme can override it. Duplication is
+    // the price of doing that in plain CSS with no build step — this is what
+    // stops the two copies drifting, which would give a user one palette and
+    // a user who had clicked the toggle a different one.
+    const system = declarations(
+      extractNestedBlock(css, ':root:not([data-theme="light"])'),
+    );
+    const explicit = declarations(extractBlock(css, '[data-theme="dark"]'));
+    expect(Object.keys(system).length).toBeGreaterThan(0);
+    expect(system).toEqual(explicit);
+  });
+
+  test("every token referenced by a story or preview actually exists", () => {
+    // A `var(--hp-does-not-exist)` fails SILENTLY: CSS resolves it to nothing
+    // and the property inherits, so the story renders with the wrong value
+    // and no error anywhere. That is exactly how `--hp-font-display` survived
+    // in the typography story after the token was removed. Reference
+    // direction is gated here; existence is gated by EXPECTED_TOKENS above.
+    const declared = cssNames();
+    const dangling: string[] = [];
+    for (const dir of ["../stories", "../.storybook"]) {
+      const root = new URL(`${dir}/`, import.meta.url);
+      for (const file of readdirSync(root, { recursive: true, encoding: "utf8" })) {
+        if (!/\.(ts|tsx|mdx|css)$/.test(file)) continue;
+        const body = readFileSync(new URL(file, root), "utf8");
+        for (const m of body.matchAll(/var\(\s*--hp-([A-Za-z0-9_-]+)\s*[,)]/g)) {
+          if (!declared.has(m[1])) dangling.push(`${dir}/${file}: --hp-${m[1]}`);
+        }
+      }
+    }
+    expect(dangling).toEqual([]);
+  });
+
   test("every required token group is present", () => {
-    for (const group of ["color", "font", "space", "radius", "motion"]) {
+    for (const group of ["color", "shadow", "font", "space", "radius", "motion"]) {
       expect(Object.keys(tokens)).toContain(group);
     }
   });

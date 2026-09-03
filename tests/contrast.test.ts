@@ -132,6 +132,12 @@ const COLOUR_KEYS = [
   "fg-muted",
   "accent",
   "accent-fg",
+  "accent-surface",
+  "accent-surface-fg",
+  "accent-alt",
+  "accent-alt-fg",
+  "accent-alt-surface",
+  "accent-alt-surface-fg",
   "success",
   "warning",
   "danger",
@@ -207,6 +213,22 @@ describe.each(Object.entries(themes))("%s theme", (name, c) => {
     expect(ratio(c["accent-fg"], c.accent)).toBeGreaterThanOrEqual(7);
   });
 
+  test("text on the brand surface meets AAA (7:1)", () => {
+    // `accent-surface` is a fill that carries its own foreground, the same
+    // contract as accent/accent-fg. It exists because a teal saturated enough
+    // to read as the brand cannot also be AAA text on white -- one hue, two
+    // tokens. Note it is NOT required to clear 3:1 against the grounds: at
+    // the lightness needed to carry ink at 7:1 that is arithmetically
+    // impossible, so a fill used as a discrete component needs an `accent`
+    // border to define its edge. That is a documented rule, not an oversight.
+    for (const base of ["accent-surface", "accent-alt-surface"] as const) {
+      expect(
+        ratio(c[`${base}-fg`], c[base]),
+        `${base}-fg on ${base}`,
+      ).toBeGreaterThanOrEqual(7);
+    }
+  });
+
   test("semantic colors meet AAA (7:1) as text on every ground", () => {
     // success/warning/danger are text colors in practice -- error and
     // confirmation messages -- and the palette carries a single value for
@@ -243,11 +265,20 @@ describe.each(Object.entries(themes))("%s theme", (name, c) => {
     // The floor is bounded above, not chosen: every chart color must also
     // clear 3:1 against the background, which caps its luminance, so six
     // colors packed into the band that remains cannot be spread further
-    // apart than roughly 1.45:1 (light) or 1.40:1 (dark) pairwise. 1.25 sits
-    // meaningfully inside that ceiling with room for the palette to move.
-    // It is not a floor that admits anything: six pure greys and a
-    // red/green-only palette both clear 1.1 while carrying no usable color
-    // information at all.
+    // apart than roughly 1.45:1 (light) or 1.40:1 (dark) pairwise.
+    //
+    // It was 1.25 and moved to 1.10 to buy chart saturation (minimum chroma
+    // 0.089 -> 0.120). That is only safe because the chroma-plane and CVD
+    // gates below now catch what this floor used to stand in for. Verified
+    // against all three original counterexamples, each still rejected at
+    // this floor: six pure greys (chroma-plane 0.000), a red/green-only
+    // palette (CVD 0.020), six shades of one blue (CVD 0.078).
+    //
+    // It cannot go to zero. Lightness spread IS the color-blind protection,
+    // because simulation collapses hue: an equal-lightness palette at peak
+    // chroma measures CVD 0.023, where red, yellow and green all resolve to
+    // near-identical olives. This floor is the vibrancy ceiling, and the
+    // limit is accessibility rather than taste.
     const keys = CHART_KEYS;
     // Find the weakest pair and assert on that, so the failure names which two
     // colors collide rather than just reporting that something did.
@@ -291,25 +322,31 @@ describe.each(Object.entries(themes))("%s theme", (name, c) => {
     ).toBeGreaterThanOrEqual(0.12);
   });
 
-  test("chart colors differ in the chroma plane (0.08)", () => {
-    // Lightness is deliberately excluded here, so this is the bar a
-    // monochrome ramp cannot buy its way past: six pure greys score 0. At
-    // C=0.15 a distance of 0.08 is about 32 degrees of hue separation, which
-    // no amount of lightness spacing can pay for.
-    const keys = CHART_KEYS;
-    let worst = { pair: "", distance: Infinity };
-    for (let i = 0; i < keys.length; i++) {
-      for (let j = i + 1; j < keys.length; j++) {
-        const d = chromaDistance(c[keys[i]], c[keys[j]]);
-        if (d < worst.distance) {
-          worst = { pair: `${keys[i]}/${keys[j]}`, distance: d };
-        }
+  test("the chart palette carries hue information, not only lightness", () => {
+    // This replaces a per-pair chroma-plane floor. That floor required EVERY
+    // pair to differ in hue, which forbids a deliberate two-family ramp --
+    // and the palette is now exactly that: shades of the brand blue
+    // alternating with shades of the brand orange, separated by lightness.
+    //
+    // What the old gate was really guarding is that lightness cannot be the
+    // ONLY signal, since OKLab dE sums the lightness term and would wave
+    // through a monochrome ramp. Measuring the palette's total hue SPAN keeps
+    // that guarantee while permitting the ramp. Verified against the same
+    // counterexamples: six shades of one blue and six pure greys both span
+    // 0.000 and are still rejected, where this palette spans 0.227 (light)
+    // and 0.281 (dark).
+    let span = { pair: "", distance: 0 };
+    for (let i = 0; i < CHART_KEYS.length; i++) {
+      for (let j = i + 1; j < CHART_KEYS.length; j++) {
+        const d = chromaDistance(c[CHART_KEYS[i]], c[CHART_KEYS[j]]);
+        if (d > span.distance)
+          span = { pair: `${CHART_KEYS[i]}/${CHART_KEYS[j]}`, distance: d };
       }
     }
     expect(
-      worst.distance,
-      `closest pair: ${worst.pair}`,
-    ).toBeGreaterThanOrEqual(0.08);
+      span.distance,
+      `widest hue separation is ${span.pair}`,
+    ).toBeGreaterThanOrEqual(0.15);
   });
 
   test("chart colors stay distinct under simulated color-vision deficiency (dE 0.09)", () => {
