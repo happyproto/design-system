@@ -1,6 +1,6 @@
 {
-  "name": "@happyproto/design-system",
-  "version": "0.0.0",
+  "name": "@happyview/design-system",
+  "version": "1.0.0",
   "description": "Design tokens for HappyProto, gated on WCAG AAA and colour-vision separation.",
   "license": "MIT",
   "type": "module",
@@ -31,6 +31,8 @@
     "build-storybook": "storybook build"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/git": "^11.0.1",
     "@storybook/addon-a11y": "^10.6.0",
     "@storybook/addon-docs": "^10.6.0",
     "@storybook/react": "^10.6.0",
@@ -42,6 +44,7 @@
     "echarts": "^6.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "semantic-release": "^25.0.9",
     "storybook": "^10.6.0",
     "typescript": "^5"
   }

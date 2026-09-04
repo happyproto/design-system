@@ -1,42 +1,55 @@
-name: Publish
+name: Release
 
-# Prerequisite, one-time, by hand: the very first publish of this package
-# cannot use OIDC trusted publishing, because npm's trusted-publisher config
-# is set on a package that must already exist. The package must be published
-# once by hand, and a GitHub Actions trusted publisher registered on
-# npmjs.com for this repo and this workflow filename, before any tag push
-# can succeed. Task 6 does this bootstrap publish, in that order.
-
+# semantic-release owns versioning: it reads the conventional commits since the
+# last tag, decides the bump, writes package.json and CHANGELOG.md, tags, and
+# publishes. There is deliberately no tag trigger — a human pushing a tag would
+# race the tool for control of the version.
 on:
   push:
-    tags: ['v[0-9]*']
+    branches: [main]
+  workflow_dispatch:
+
+# One release at a time. Two concurrent runs would both compute "the next
+# version" from the same baseline and one would publish over the other.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      id-token: write
+      contents: write # commit package.json + CHANGELOG, push the tag, cut the release
+      issues: write # comment on released issues
+      pull-requests: write # comment on released pull requests
+      id-token: write # OIDC trusted publishing, and provenance attestation
     steps:
       - uses: actions/checkout@v7
-      # Fail fast: the tag drives the trigger but nothing else reads it, so
-      # without this a tag mismatching package.json's version would publish
-      # the wrong version, and the *next* tag would then fail with an error
-      # naming a version that appears in no tag.
-      - name: Tag must match package version
-        run: |
-          pkg="v$(node -p "require('./package.json').version")"
-          [ "$pkg" = "$GITHUB_REF_NAME" ] || { echo "tag $GITHUB_REF_NAME != $pkg"; exit 1; }
+        with:
+          # semantic-release determines the next version from the commits since
+          # the last tag, so a shallow clone would make it misread the history.
+          fetch-depth: 0
+          persist-credentials: true
+
       - uses: oven-sh/setup-bun@v2
-      # Arbitrary lifecycle scripts should not run while this job holds
-      # id-token: write.
-      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun install --frozen-lockfile
+
+      # The gates run before anything is published, not after. A palette that
+      # fails AAA must never reach the registry.
       - run: bun test
+      - run: bunx tsc --noEmit
+
       - uses: actions/setup-node@v7
         with:
+          # Node 24.20.0 bundles npm 11.19.0. Trusted publishing needs npm
+          # 11.5.1+, so this pin is load-bearing, not incidental.
           node-version: '24.20.0'
           registry-url: 'https://registry.npmjs.org'
-      # Node 24.20.0 bundles npm 11.19.0, which already clears the 11.5.1+
-      # that OIDC trusted publishing needs, so no separate npm upgrade step
-      # is required (Node 22 bundles npm 10.9.8, which is why one existed).
-      - run: npm publish
+
+      # No NPM_TOKEN. Publishing authenticates by OIDC against the trusted
+      # publisher registered on npmjs.com for this repo and this workflow file
+      # — which is why renaming this file breaks releases until the publisher
+      # is updated to match.
+      - run: npx --yes semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
