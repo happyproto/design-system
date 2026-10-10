@@ -1,0 +1,709 @@
+/* Marketing surfaces: the happyproto.at landing page.
+ *
+ * Every colour, size, weight, radius, shadow, duration and easing here is a
+ * design-system token. happyproto.at/src/styles/marketing.css is a verbatim
+ * copy: change it here first.
+ *
+ * Literal exceptions, each commented where it appears:
+ * - layout widths and breakpoints (68rem container, 30rem form, 16rem term
+ *   column, 4rem header, and the 29.99rem max-width queries just under the
+ *   30rem step), the 65ch measure, the 40ch closing lede and the 12ch minimum
+ *   for a log line's text beside its timestamp;
+ * - 100dvh for the page's minimum height;
+ * - 1px hairline borders and 2px focus rings with their 2px offset;
+ * - 50% for the round status dots, and 1px boxes clipped with inset(50%) for
+ *   the visually hidden honeypot and screen-reader-only text;
+ * - 1em for the inline link icon and the lede's code, so both match their text;
+ * - 2.75rem (44px) minimum touch targets;
+ * - the 180ms stagger between upgrade-log lines (their 4px rise is the
+ *   --hp-space-1 token);
+ * - derived values: calc(2 * text-sm * leading-normal) for the status
+ *   line's two reserved lines, and calc((1lh - var(--hp-space-2)) / 2) to
+ *   centre a dot on the first line of text (1lh is the line height);
+ * - -webkit-font-smoothing: antialiased, a rendering hint with no token.
+ *
+ * Breakpoints: 30rem (480px) stacks the signup row; 40rem (640px) steps the
+ * display type up; 48rem (768px) puts the handled terms beside their details;
+ * 64rem (1024px) puts the log beside the hero copy.
+ */
+
+.mk-page {
+  margin: 0;
+  min-block-size: 100dvh;
+  accent-color: var(--hp-color-accent);
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+  font-family: var(--hp-font-sans);
+  font-size: var(--hp-text-base);
+  line-height: var(--hp-leading-normal);
+  -webkit-font-smoothing: antialiased; /* rendering hint, see header */
+}
+
+.mk-page ::selection {
+  background: var(--hp-color-accent-surface);
+  color: var(--hp-color-accent-surface-fg);
+}
+
+/* Scoped border-box so 100%-wide containers with padding never overflow the viewport. */
+.mk-page,
+.mk-page *,
+.mk-page *::before,
+.mk-page *::after {
+  box-sizing: border-box;
+}
+
+.mk-container {
+  inline-size: 100%;
+  max-inline-size: 68rem; /* 1088px */
+  margin-inline: auto;
+  padding-inline: var(--hp-space-4);
+}
+
+@media (min-width: 40rem) {
+  .mk-container {
+    padding-inline: var(--hp-space-8);
+  }
+}
+
+/* ---- Links ---------------------------------------------------------------- */
+
+.mk-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-1);
+  min-block-size: 2.75rem; /* 44px touch target */
+  color: var(--hp-color-accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: var(--hp-space-1);
+  border-radius: var(--hp-radius-sm);
+  transition: color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.mk-link:hover {
+  color: var(--hp-color-fg);
+}
+
+.mk-link:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+.mk-link-icon {
+  flex: none;
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+/* A link that is a button: resets the form back to idle. */
+.mk-text-button {
+  appearance: none;
+  justify-self: start;
+  min-block-size: 2.75rem; /* 44px touch target */
+  padding: 0;
+  border: 0;
+  border-radius: var(--hp-radius-sm);
+  background: none;
+  color: var(--hp-color-fg);
+  font: inherit;
+  font-size: var(--hp-text-sm);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: var(--hp-space-1);
+  cursor: pointer;
+  transition: color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.mk-text-button:hover {
+  color: var(--hp-color-accent);
+}
+
+.mk-text-button:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+/* ---- Header --------------------------------------------------------------- */
+
+.mk-header {
+  border-block-end: 1px solid var(--hp-color-border);
+}
+
+.mk-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hp-space-2) var(--hp-space-4);
+  min-block-size: 4rem; /* 64px */
+}
+
+.mk-header-home {
+  display: flex;
+  align-items: center;
+  min-block-size: 2.75rem; /* 44px touch target */
+  border-radius: var(--hp-radius-sm);
+}
+
+.mk-header-home:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+.mk-logo {
+  display: block;
+  block-size: var(--hp-space-8);
+  inline-size: auto;
+}
+
+.mk-header .mk-link {
+  font-size: var(--hp-text-sm);
+}
+
+/* The logotype files are named for their ink: .dark has dark "Proto" and sits
+   on light grounds; .light has white "Proto" and sits on dark grounds. */
+.mk-logo-on-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mk-logo-on-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .mk-logo-on-dark {
+    display: block;
+  }
+}
+
+[data-theme="dark"] .mk-logo-on-light {
+  display: none;
+}
+
+[data-theme="dark"] .mk-logo-on-dark {
+  display: block;
+}
+
+/* ---- Hero ----------------------------------------------------------------- */
+
+.mk-hero {
+  padding-block: var(--hp-space-12);
+}
+
+.mk-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-12);
+}
+
+@media (min-width: 64rem) {
+  .mk-hero-grid {
+    /* Even halves: wide enough for the log's last line to stay on one line. */
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+  }
+  .mk-log {
+    align-self: center;
+  }
+}
+
+.mk-hero-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-6);
+  justify-items: start;
+}
+
+/* A fixed step, not clamp(): the display size is for screens wide enough to
+   hold it, and below that the section-heading size takes over. */
+.mk-title {
+  margin: 0;
+  font-size: var(--hp-text-3xl);
+  font-weight: var(--hp-weight-semibold);
+  line-height: var(--hp-leading-tight);
+  letter-spacing: var(--hp-tracking-tight);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  /* Stretch, not shrink-to-fit: as a start-aligned item the heading sized to
+     its longest unbreakable run ("AT Protocol") and overflowed at 200% text. */
+  justify-self: stretch;
+}
+
+@media (min-width: 40rem) {
+  .mk-title {
+    font-size: var(--hp-text-5xl);
+  }
+}
+
+.mk-lede {
+  margin: 0;
+  max-inline-size: 65ch;
+  font-size: var(--hp-text-lg);
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+}
+
+.mk-code {
+  font-family: var(--hp-font-mono);
+  font-size: 1em; /* matches the sentence around it */
+  color: var(--hp-color-fg);
+  /* The hostname never breaks at its hyphen... */
+  white-space: nowrap;
+}
+
+/* ...except on a phone with enlarged text, where wrapping beats overflowing.
+   `.mk-host` holds the hostname and the punctuation after it; as an
+   inline-block it moves to the next line whole whenever it fits there, so it
+   only breaks inside when it is wider than the line, and the full stop never
+   starts a line of its own. */
+@media (max-width: 29.99rem) {
+  .mk-host {
+    display: inline-block;
+    max-inline-size: 100%;
+  }
+  .mk-host .mk-code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ---- Signup form ---------------------------------------------------------- */
+
+.mk-signup {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-2);
+  inline-size: 100%;
+  max-inline-size: 30rem; /* 480px */
+}
+
+.mk-signup-label {
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  color: var(--hp-color-fg-muted);
+}
+
+.mk-signup-row {
+  display: flex;
+  gap: var(--hp-space-2);
+}
+
+@media (max-width: 29.99rem) {
+  .mk-signup-row {
+    flex-direction: column;
+  }
+}
+
+.mk-signup-input {
+  flex: 1;
+  min-inline-size: 0;
+  /* fg-muted, not border-strong: the field's edge has to reach 3:1 on bg. */
+  border: 1px solid var(--hp-color-fg-muted);
+  border-radius: var(--hp-radius-md);
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+  caret-color: var(--hp-color-accent);
+  font: inherit;
+  font-size: var(--hp-text-base);
+  padding: var(--hp-space-3);
+  transition: border-color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+/* Held to the same 7:1 bar as body text. */
+.mk-signup-input::placeholder {
+  color: var(--hp-color-fg-muted);
+}
+
+.mk-signup-input:focus-visible {
+  border-color: var(--hp-color-accent);
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+.mk-signup-input[aria-invalid="true"] {
+  border-color: var(--hp-color-danger);
+}
+
+.mk-signup-input[aria-invalid="true"]:focus-visible {
+  outline-color: var(--hp-color-danger);
+}
+
+.mk-signup-submit {
+  appearance: none;
+  flex: none;
+  border: 1px solid var(--hp-color-accent);
+  border-radius: var(--hp-radius-md);
+  background: var(--hp-color-accent);
+  color: var(--hp-color-accent-fg);
+  font: inherit;
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  padding: var(--hp-space-3) var(--hp-space-4);
+  cursor: pointer;
+  transition:
+    background var(--hp-motion-duration-fast) var(--hp-motion-ease),
+    border-color var(--hp-motion-duration-fast) var(--hp-motion-ease),
+    color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+/* The border stays accent so the edge holds on hover in dark mode. */
+.mk-signup-submit:hover:not(:disabled) {
+  background: var(--hp-color-accent-surface);
+  border-color: var(--hp-color-accent);
+  color: var(--hp-color-accent-surface-fg);
+}
+
+.mk-signup-submit:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+/* No opacity trick: it would break the contrast guarantee silently. */
+.mk-signup-submit:disabled {
+  cursor: default;
+  background: var(--hp-color-surface-raised);
+  border-color: var(--hp-color-border);
+  color: var(--hp-color-fg-muted);
+}
+
+/* Two lines reserved, so the layout does not jump as the message changes. */
+.mk-signup-status {
+  margin: 0;
+  min-block-size: calc(2 * var(--hp-text-sm) * var(--hp-leading-normal));
+  font-size: var(--hp-text-sm);
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+  /* A very long address must wrap, not push the page sideways. */
+  overflow-wrap: anywhere;
+}
+
+.mk-signup-status:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.mk-signup-status:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+.mk-signup-status[data-tone="error"] {
+  color: var(--hp-color-danger);
+}
+
+.mk-signup-status[data-tone="success"] {
+  color: var(--hp-color-fg);
+  font-weight: var(--hp-weight-medium);
+}
+
+/* The log's success dot, static: a reading, not a celebration. */
+.mk-signup-status[data-tone="success"]::before {
+  content: "";
+  display: inline-block;
+  inline-size: var(--hp-space-2);
+  block-size: var(--hp-space-2);
+  margin-inline-end: var(--hp-space-2);
+  border-radius: 50%;
+  background: var(--hp-color-success);
+  vertical-align: middle;
+}
+
+.mk-signup[data-state="success"] .mk-signup-label,
+.mk-signup[data-state="success"] .mk-signup-row,
+.mk-signup:not([data-state="success"]) .mk-text-button {
+  display: none;
+}
+
+/* Links in running text drop the touch-target box (WCAG 2.5.8 exempts inline links). */
+.mk-signup-status .mk-link,
+.mk-faq-a .mk-link {
+  display: inline;
+  min-block-size: 0;
+}
+
+.mk-signup-trap,
+.mk-sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.mk-noscript {
+  margin: 0;
+  font-size: var(--hp-text-sm);
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- Panel: the log's frame ------------------------------------------------ */
+
+.mk-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-4);
+  margin: 0;
+  padding: var(--hp-space-6);
+  border: 1px solid var(--hp-color-border-strong);
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  box-shadow: var(--hp-shadow-ambient);
+}
+
+.mk-panel-head {
+  display: flex;
+  padding-block-end: var(--hp-space-4);
+  border-block-end: 1px solid var(--hp-color-border);
+}
+
+.mk-panel-host {
+  min-inline-size: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  color: var(--hp-color-fg);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Upgrade log --------------------------------------------------------- */
+
+/* Real log data, so monospace: the timestamps line up as a column. */
+.mk-log-lines {
+  display: grid;
+  gap: var(--hp-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-variant-numeric: var(--hp-font-numeric);
+  color: var(--hp-color-fg);
+}
+
+/* Time, then text beside it; when there is no room for at least 12ch of text
+   beside the time (enlarged text on a phone), the text drops under it. */
+.mk-log-line {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--hp-space-3);
+  animation: mk-log-in var(--hp-motion-duration-base) var(--hp-motion-ease) backwards;
+  animation-delay: calc(var(--i, 0) * 180ms); /* the stagger between lines */
+}
+
+.mk-log-time {
+  flex: none;
+  color: var(--hp-color-fg-muted);
+}
+
+.mk-log-text {
+  flex: 1 1 12ch;
+  min-inline-size: 0;
+  text-wrap: balance;
+}
+
+/* The one place orange is spent: the line that needed attention. */
+.mk-log-line[data-tone="attention"] {
+  color: var(--hp-color-accent-alt);
+}
+
+.mk-log-line[data-tone="ok"] {
+  font-weight: var(--hp-weight-medium);
+}
+
+/* A wrapped status hangs under its words, not under the dot. */
+.mk-log-line[data-tone="ok"] .mk-log-text {
+  display: flex;
+  align-items: baseline;
+  gap: var(--hp-space-2);
+}
+
+/* The words carry the meaning; the dot only repeats it. Static: the panel is illustrative. */
+.mk-log-dot {
+  flex: none;
+  /* Centred on the first line of text, however many lines it wraps to. */
+  align-self: flex-start;
+  margin-block-start: calc((1lh - var(--hp-space-2)) / 2);
+  inline-size: var(--hp-space-2);
+  block-size: var(--hp-space-2);
+  border-radius: 50%;
+  background: var(--hp-color-success);
+}
+
+.mk-log-caption {
+  padding-block-start: var(--hp-space-4);
+  border-block-start: 1px solid var(--hp-color-border);
+  font-size: var(--hp-text-sm);
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+}
+
+/* `backwards` fill: before and without the animation, every line is visible. */
+@keyframes mk-log-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--hp-space-1);
+  }
+}
+
+/* ---- Sections ------------------------------------------------------------- */
+
+.mk-section {
+  padding-block: var(--hp-space-12);
+  border-block-start: 1px solid var(--hp-color-border);
+}
+
+/* A full-bleed band that changes the page's rhythm below the fold. AAA is
+   gated against surface-raised, the stricter ground. */
+.mk-section[data-ground="surface"] {
+  background: var(--hp-color-surface-raised);
+}
+
+.mk-section-title {
+  margin: 0 0 var(--hp-space-8);
+  font-size: var(--hp-text-2xl);
+  font-weight: var(--hp-weight-semibold);
+  line-height: var(--hp-leading-tight);
+  letter-spacing: var(--hp-tracking-tight);
+  text-wrap: balance;
+}
+
+@media (min-width: 40rem) {
+  .mk-section-title {
+    font-size: var(--hp-text-3xl);
+  }
+}
+
+/* ---- What's handled ------------------------------------------------------- */
+
+.mk-handled {
+  display: grid;
+  margin: 0;
+  border-block-end: 1px solid var(--hp-color-border);
+}
+
+.mk-handled-item {
+  display: grid;
+  gap: var(--hp-space-1) var(--hp-space-8);
+  padding-block: var(--hp-space-4);
+  border-block-start: 1px solid var(--hp-color-border);
+}
+
+@media (min-width: 48rem) {
+  .mk-handled-item {
+    grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); /* 256px term column */
+    align-items: baseline;
+  }
+}
+
+.mk-handled-item dt {
+  font-weight: var(--hp-weight-semibold);
+}
+
+.mk-handled-item dd {
+  margin: 0;
+}
+
+.mk-handled-detail {
+  max-inline-size: 65ch;
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+}
+
+/* ---- FAQ ------------------------------------------------------------------ */
+
+/* One column, like the handled list: answers read in order. */
+.mk-faq {
+  display: grid;
+  gap: var(--hp-space-8);
+  margin: 0;
+}
+
+.mk-faq-item {
+  display: grid;
+  align-content: start;
+  gap: var(--hp-space-2);
+  max-inline-size: 65ch;
+}
+
+.mk-faq-q {
+  font-weight: var(--hp-weight-semibold);
+  color: var(--hp-color-fg);
+  text-wrap: balance;
+}
+
+.mk-faq-a {
+  margin: 0;
+  max-inline-size: 65ch;
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+}
+
+/* ---- Closing CTA and footer ----------------------------------------------- */
+
+/* No hairline above: the closing signup ends the "Before you join"
+   conversation rather than starting a new band, but keeps its full space. */
+.mk-section[data-seam="none"] {
+  border-block-start: 0;
+  padding-block-start: var(--hp-space-12);
+}
+
+/* One left-aligned column: heading, the line that pays off the log, then the
+   form (capped at 30rem by its own rule). */
+.mk-cta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-6);
+}
+
+.mk-cta .mk-section-title {
+  margin: 0;
+}
+
+.mk-cta-lede {
+  margin: 0;
+  max-inline-size: 40ch;
+  font-size: var(--hp-text-lg);
+  color: var(--hp-color-fg-muted);
+  text-wrap: pretty;
+}
+
+.mk-footer {
+  padding-block: var(--hp-space-8);
+  border-block-start: 1px solid var(--hp-color-border);
+  font-size: var(--hp-text-sm);
+  color: var(--hp-color-fg-muted);
+}
+
+.mk-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--hp-space-4);
+}
+
+.mk-footer-inner p {
+  margin: 0;
+}
+
+.mk-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--hp-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- Reduced motion ------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-log-line {
+    animation: none;
+  }
+  .mk-link,
+  .mk-text-button,
+  .mk-signup-input,
+  .mk-signup-submit {
+    transition: none;
+  }
+}
