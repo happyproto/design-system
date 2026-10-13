@@ -26,6 +26,12 @@
  * exception, being in the reader's voice ("Can I leave?"). Nothing implies a
  * team, and no person is named.
  *
+ * v7 (the infrastructure look): each section, and the hero's stage, has an
+ * `eyebrow`: a small mono label above its headline (above the stage in the
+ * hero), its number and its subject. Labels, not claims. They are
+ * aria-hidden on the page, so they add nothing to a heading's or a
+ * landmark's name.
+ *
  * `{name}` in a string is a slot, filled by the renderer: a link from the
  * string's `links`, an address, or a hostname as code.
  */
@@ -142,6 +148,7 @@ function responseLines(): Line[] {
  * by `name`): its code is never read out line by line.
  */
 export const stage = {
+  eyebrow: '01 · Endpoints',
   name: 'Sample HappyView instance at statusphere.hpy.at: three lexicons, and a listStatuses query returning recent statuses.',
   url: 'statusphere.hpy.at',
   sample: 'Sample',
@@ -191,6 +198,7 @@ export const features = {
    */
   network: {
     id: 'network',
+    eyebrow: '02 · Indexing',
     title: 'Indexed from the network',
     line: 'Jetstream and backfill are connected for you.',
     name: 'Sample backfill job for xyz.statusphere.status: Jetstream connected, and every stage from discovering repos to completed done.',
@@ -220,6 +228,7 @@ export const features = {
    */
   plugins: {
     id: 'plugins',
+    eyebrow: '03 · Plugins',
     title: 'Lua and WASM plugins',
     line: 'Your scripts and plugins work the same as self-hosted.',
     name: 'Sample Lua script for xyz.statusphere.listStatuses, which pages through statuses with db.query, beside an installed WASM auth plugin for Steam.',
@@ -245,6 +254,7 @@ export const features = {
    */
   upgrades: {
     id: 'upgrades',
+    eyebrow: '04 · Upgrades',
     title: 'Upgrades on your schedule',
     line: 'Snapshotted first, or held until you’re ready.',
     name: 'Sample upgrade from HappyView 2.15.0 to 2.16.0: snapshot taken, with the choice to install now or hold.',
@@ -413,6 +423,7 @@ export const CROSS = '✗'
  * self-hosting (spec claims list).
  */
 export const compare = {
+  eyebrow: '05 · Compare',
   title: 'What HappyProto runs for you',
   columns: { what: 'What', hosted: 'HappyProto', self: 'Self-hosted' },
   marks: {
@@ -441,6 +452,7 @@ export const compare = {
  * its heading.
  */
 export const faq = {
+  eyebrow: '06 · FAQ',
   title: 'FAQ',
   anchor: 'faq',
   permalink: { text: '#', label: 'Link to this question: {q}' },

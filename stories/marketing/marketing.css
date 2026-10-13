@@ -21,7 +21,15 @@
  *   pointy-top honeycomb repeats every √3 × its width, so 1.7320508)
  *   intersected with a radial fade that peaks at 70% (mask values, not
  *   colours: a mask's alpha), so the lines stay behind the type. The lines' colour is the hairline token, warmed toward the
- *   accent near the top centre (color-mix, 55% at the heart);
+ *   accent near the top centre (color-mix, 30% at the heart: v7 eased
+ *   it from 55% so the stage's corner brackets are the one accent moment
+ *   outside the windows);
+ * - the frame (v7): its gutter, 0px on a phone (the rails hide there) and
+ *   space-4 from 30rem; the crosshair marks at every rail crossing, a
+ *   space-3 square less 1px (11px, odd so its 1px arms centre on the
+ *   1px hairlines), drawn as four 1px gradient bars in border-strong; the
+ *   stage's corner brackets, space-4 arms of 1px accent, space-2 outside
+ *   its corners;
  * - the comparison's HappyProto band (v6): light-dark() of the accent
  *   surface mixed into the page ground, 10% in light and 45% in dark, the
  *   tints at which fg-muted (pending rows) still clears 7:1 (7.23 and
@@ -103,11 +111,26 @@
   font-size: var(--hp-text-base);
   line-height: var(--hp-leading-normal);
   -webkit-font-smoothing: antialiased; /* rendering hint, see header */
+  /* The frame (v7): the content column's width, which the rails, the
+     crosshairs and every container share. */
+  --mk-frame-gutter: 0px; /* see header */
+  --mk-frame: min(100% - 2 * var(--mk-frame-gutter), 78rem);
+  /* A crosshair mark's square, and a cell's padding (half the section gap,
+     so two cells apart by a hairline keep the section rhythm). */
+  --mk-cross: calc(var(--hp-space-3) - 1px); /* 11px, see header */
+  --mk-cell-pad: calc(var(--mk-gap-section) / 2);
+  position: relative; /* the rails' box */
   /* The last resort at 300% text on a phone (round 14): a word wider than
      its column breaks rather than push the page sideways. Lines still break
      at spaces (and code at its marked points) first; anything that must
      not break says so (white-space: nowrap, or overflow-wrap: normal). */
   overflow-wrap: anywhere;
+}
+
+@media (min-width: 30rem) {
+  .mk-page {
+    --mk-frame-gutter: var(--hp-space-4);
+  }
 }
 
 @media (min-width: 40rem) {
@@ -144,8 +167,7 @@
 }
 
 .mk-container {
-  inline-size: 100%;
-  max-inline-size: 78rem; /* 1248px: the stage spans about 1200px */
+  inline-size: var(--mk-frame); /* at most 78rem (1248px): the stage spans 1184px */
   margin-inline: auto;
   padding-inline: var(--hp-space-4);
 }
@@ -180,6 +202,83 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--hp-space-8);
+}
+
+/* ---- The frame (v7) ----------------------------------------------------------- */
+
+/* The page reads like a technical drawing: the content column has a 1px
+   rail in the hairline token down each edge, from the header to the end
+   of the footer; every section boundary is a full-width hairline that
+   crosses them, and every crossing carries a small "+" in border-strong.
+   The rails sit at the frame's edges (the content column, inset by a
+   gutter); on a phone (under 30rem) the frame is the viewport, so the
+   rails and the crosshairs hide. All of it is pseudo-elements: nothing
+   for assistive technology, nothing to click, no scroll (the crosshairs
+   reach 5px past the rails, well inside the gutter). Print drops it. */
+.mk-page::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0;
+  margin-inline: auto;
+  inline-size: var(--mk-frame);
+  border-inline: 1px solid var(--hp-color-border);
+  pointer-events: none;
+}
+
+/* The crosshairs on a hairline at the top (sections, the footer) or the
+   bottom (the header) of a full-width box: one strip as wide as the frame
+   plus a mark, centred on the line, with a "+" at each end: two 1px bars
+   each, centred on the rail. */
+.mk-header::after,
+.mk-section::after,
+.mk-footer::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
+  margin-inline: auto;
+  inline-size: calc(var(--mk-frame) + var(--mk-cross) - 1px);
+  block-size: var(--mk-cross);
+  pointer-events: none;
+  --mk-cross-ink: linear-gradient(var(--hp-color-border-strong), var(--hp-color-border-strong));
+  --mk-cross-arm: calc((var(--mk-cross) - 1px) / 2);
+  background:
+    var(--mk-cross-ink) 0 50% / var(--mk-cross) 1px no-repeat,
+    var(--mk-cross-ink) var(--mk-cross-arm) 0 / 1px 100% no-repeat,
+    var(--mk-cross-ink) 100% 50% / var(--mk-cross) 1px no-repeat,
+    var(--mk-cross-ink) calc(100% - var(--mk-cross-arm)) 0 / 1px 100% no-repeat;
+}
+
+.mk-section::after,
+.mk-footer::before {
+  inset-block-start: calc(-1 * (var(--mk-cross) + 1px) / 2);
+}
+
+.mk-header::after {
+  inset-block-end: calc(-1 * (var(--mk-cross) + 1px) / 2);
+}
+
+@media (max-width: 29.99rem) {
+  .mk-page::before,
+  .mk-header::after,
+  .mk-section::after,
+  .mk-footer::before {
+    display: none;
+  }
+}
+
+/* A mono label above a section's headline (and above the hero's stage):
+   its number and its subject, in the muted ink, sentence case, untracked.
+   A label, not a claim, and not part of the heading: aria-hidden, so it
+   adds nothing to a heading's or a landmark's name. */
+.mk-eyebrow {
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-snug);
+  font-variant-numeric: var(--hp-font-numeric);
+  color: var(--hp-color-fg-muted);
 }
 
 /* ---- Links and buttons ------------------------------------------------------ */
@@ -296,7 +395,7 @@
 }
 
 .mk-header[data-wrapped] {
-  position: static;
+  position: relative; /* in the flow; still the crosshairs' box */
 }
 
 /* Skip link: visually hidden until focused, then shown over the header's
@@ -322,7 +421,15 @@
 }
 
 /* 64px, one row at every width at the default text size; enlarged text
-   may wrap it rather than push the page sideways. */
+   may wrap it rather than push the page sideways. From 30rem it carries
+   the rails through the header (which covers the page's own), so its
+   hairline meets them at the crosshairs. */
+@media (min-width: 30rem) {
+  .mk-header-inner {
+    border-inline: 1px solid var(--hp-color-border);
+  }
+}
+
 .mk-header-inner {
   display: flex;
   flex-wrap: wrap;
@@ -498,7 +605,7 @@
   pointer-events: none;
   background: radial-gradient(
     ellipse 45% 40% at var(--mk-hex-heart),
-    color-mix(in oklab, var(--hp-color-accent) 55%, var(--hp-color-border)),
+    color-mix(in oklab, var(--hp-color-accent) 30%, var(--hp-color-border)),
     var(--hp-color-border) 100%
   );
   /* mask alpha, see header */
@@ -509,17 +616,12 @@
   mask-composite: intersect;
 }
 
-/* The close's honeycomb reaches up into the gap above it (the close
-   shares that gap with the FAQ, so it has no top padding of its own) and
-   fades out on every side from the middle, around the H2 and the form;
-   its lines warm toward the accent there. */
+/* The close's honeycomb fades out on every side from the middle, around
+   the H2 and the form, inside its own frame row (the hairline above it is
+   its edge); its lines warm toward the accent there. */
 .mk-cta-section[data-backdrop] {
   --mk-hex-fade: radial-gradient(ellipse 60% 50% at 50% 50%, rgb(0 0 0 / 0.7) 20%, transparent 100%);
   --mk-hex-heart: 50% 50%;
-}
-
-.mk-cta-section[data-backdrop]::before {
-  inset-block-start: calc(-1 * var(--mk-gap-section));
 }
 
 /* The H1 and the sub fill the column (so a word wider than it, at enlarged
@@ -533,8 +635,48 @@
   justify-self: center;
 }
 
-.mk-hero-inner > :is(.mk-stage, .mk-credentials) {
+.mk-hero-inner > :is(.mk-stage-wrap, .mk-credentials) {
   min-inline-size: 0;
+}
+
+/* The hero closes half a section gap under the credential line, at the
+   hairline where the first point's cells begin. */
+.mk-hero {
+  padding-block-end: var(--mk-cell-pad);
+}
+
+/* The stage with its label ("01 · Endpoints") above it, at its start edge,
+   and its corner brackets: thin L-shaped ticks in the accent just outside
+   its four corners, like a framed product shot. Static, a pseudo-element
+   (nothing for assistive technology), inside the container's padding. */
+.mk-stage-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--hp-space-4);
+}
+
+.mk-stage-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mk-stage-frame::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--hp-space-2));
+  pointer-events: none;
+  --mk-tick: linear-gradient(var(--hp-color-accent), var(--hp-color-accent));
+  --mk-arm: var(--hp-space-4);
+  background:
+    var(--mk-tick) 0 0 / var(--mk-arm) 1px no-repeat,
+    var(--mk-tick) 0 0 / 1px var(--mk-arm) no-repeat,
+    var(--mk-tick) 100% 0 / var(--mk-arm) 1px no-repeat,
+    var(--mk-tick) 100% 0 / 1px var(--mk-arm) no-repeat,
+    var(--mk-tick) 0 100% / var(--mk-arm) 1px no-repeat,
+    var(--mk-tick) 0 100% / 1px var(--mk-arm) no-repeat,
+    var(--mk-tick) 100% 100% / var(--mk-arm) 1px no-repeat,
+    var(--mk-tick) 100% 100% / 1px var(--mk-arm) no-repeat;
 }
 
 /* The status pill above the H1: a small chip on the panel ground with a
@@ -1337,13 +1479,75 @@
 
 /* ---- Sections ------------------------------------------------------------- */
 
+/* Every section below the hero is a row of the frame: a full-width
+   hairline at its top, crossing the rails (with the crosshairs). The
+   points, the table and the FAQ are cells (below): their padding is
+   theirs. The close pads itself by the section gap. */
 .mk-section {
+  position: relative; /* the crosshairs' box */
   padding-block: var(--mk-gap-section);
+  border-block-start: 1px solid var(--hp-color-border);
 }
 
-/* Two sections on the same ground share one gap, not two. */
-.mk-section:not([data-ground]) + .mk-section:not([data-ground]) {
-  padding-block-start: 0;
+/* ---- Cells (v7) ---------------------------------------------------------------- */
+
+/* Shared-border cells, Vercel's bento: the section's container is the
+   frame's full width with no padding of its own; its headline cell and its
+   content cell each pad themselves (the container's inline padding, half
+   the section gap above and below) and, from 64rem, sit beside each other
+   apart by a 1px line that runs the section's full height; below, one over
+   the other with no line between (see below). No rounded cards: the frame is the structure. The
+   content cell is the window, the table or the FAQ itself, padded by its
+   margin, so no box is added. */
+.mk-section.mk-feature,
+.mk-section.mk-split {
+  padding-block: 0;
+}
+
+.mk-cells {
+  --mk-cell-inline: var(--hp-space-4);
+  padding-inline: 0;
+  column-gap: 0;
+  row-gap: 0;
+  align-items: stretch;
+}
+
+@media (min-width: 40rem) {
+  .mk-cells {
+    --mk-cell-inline: var(--hp-space-8);
+  }
+}
+
+/* Stacked (under 64rem) the two cells read as one: the headline, then its
+   content space-8 under it, with no line between them, so a headline is
+   never as close to the panel above it as to its own (the section's
+   hairline is the only rule). */
+.mk-cells > .mk-cell-head {
+  padding: var(--mk-cell-pad) var(--mk-cell-inline) 0;
+}
+
+.mk-cells > :not(.mk-cell-head) {
+  margin: var(--hp-space-8) var(--mk-cell-inline) var(--mk-cell-pad);
+}
+
+/* A table takes its width as a percentage of the cell's area, so the
+   margins come off it, or it would push past the rail. */
+.mk-cells > .mk-compare {
+  inline-size: calc(100% - 2 * var(--mk-cell-inline));
+}
+
+@media (min-width: 64rem) {
+  .mk-cells > .mk-cell-head {
+    padding-block-end: var(--mk-cell-pad);
+    border-inline-end: 1px solid var(--hp-color-border);
+  }
+  .mk-cells > :not(.mk-cell-head) {
+    margin-block-start: var(--mk-cell-pad);
+  }
+  .mk-feature[data-flip] .mk-cells > .mk-cell-head {
+    border-inline-end: 0;
+    border-inline-start: 1px solid var(--hp-color-border);
+  }
 }
 
 /* A full-bleed band that changes the page's rhythm below the fold. AAA is
@@ -1384,21 +1588,26 @@
   gap: var(--hp-space-3);
 }
 
+/* The label sits a step further from its headline than the line under it. */
+:is(.mk-section-head, .mk-feature-copy) > .mk-eyebrow {
+  margin-block-end: var(--hp-space-2);
+}
+
 /* ---- One point per section ------------------------------------------------- */
 
 /* The headline and its one line, then the panel. From 64rem, side by side:
    the copy in five columns, the panel in seven, centred on each other; the
    panel on the right, or on the left where data-flip is set. The markup
    order (copy, panel) is the reading order at every width. */
-.mk-feature-grid {
-  row-gap: var(--hp-space-8);
-  align-items: center;
+.mk-feature-grid > .mk-window {
+  align-self: center;
 }
 
-/* The headline with its line close under it. */
+/* The headline with its line close under it, centred in its cell on the
+   panel beside it. */
 .mk-feature-copy {
   display: grid;
-  align-content: start;
+  align-content: center;
   gap: var(--hp-space-3);
 }
 
@@ -1437,10 +1646,6 @@
 /* The table's and the FAQ's sections: the headline, then its content;
    from 64rem the headline takes four columns and the content the other
    eight, beside it. */
-.mk-split-grid {
-  row-gap: var(--hp-space-8);
-}
-
 @media (min-width: 64rem) {
   .mk-split-grid > .mk-section-head {
     grid-column: 1 / span 4;
@@ -1600,7 +1805,6 @@
    item per row, apart by hairlines, each at a readable measure. */
 .mk-faq {
   margin: 0;
-  border-block-end: 1px solid var(--hp-color-border);
 }
 
 .mk-faq-item {
@@ -1616,11 +1820,15 @@
   max-inline-size: 65ch;
 }
 
-@media (min-width: 64rem) {
-  .mk-faq-item:first-child {
-    border-block-start: 0;
-    padding-block-start: 0;
-  }
+/* The FAQ is a cell: its first item starts at the cell's edge and its
+   last ends there, the cell's own lines above and below. */
+.mk-faq-item:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.mk-faq-item:last-child {
+  padding-block-end: 0;
 }
 
 .mk-faq-q {
@@ -1684,10 +1892,12 @@
   background: var(--hp-color-accent);
 }
 
-@media (min-width: 64rem) {
-  .mk-faq-item:target:first-child::before {
-    inset-block-start: 0;
-  }
+.mk-faq-item:target:first-child::before {
+  inset-block-start: 0;
+}
+
+.mk-faq-item:target:last-child::before {
+  inset-block-end: 0;
 }
 
 .mk-faq-a {
@@ -2124,8 +2334,11 @@
 
 /* ---- Footer --------------------------------------------------------------- */
 
+/* The footer is the frame's last row: the crosshair-ruled hairline at its
+   top, the rails down its sides (the page's own), and from 48rem two cells
+   apart by a 1px line, the copyright, then the links at the far end. */
 .mk-footer {
-  padding-block: var(--hp-space-8);
+  position: relative; /* the crosshairs' box */
   border-block-start: 1px solid var(--hp-color-border);
   font-size: var(--hp-text-sm);
   color: var(--hp-color-fg-muted);
@@ -2137,6 +2350,30 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--hp-space-4);
+  padding-block: var(--hp-space-8);
+}
+
+@media (min-width: 48rem) {
+  .mk-footer-inner {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0;
+    padding-block: 0;
+  }
+  .mk-footer-inner > * {
+    display: flex;
+    align-items: center;
+    padding-block: var(--hp-space-6);
+  }
+  .mk-footer-inner > p {
+    padding-inline-end: var(--hp-space-8);
+    border-inline-end: 1px solid var(--hp-color-border);
+  }
+  .mk-footer-inner > .mk-footer-links {
+    justify-content: flex-end;
+    padding-inline-start: var(--hp-space-8);
+  }
 }
 
 .mk-footer-inner p {
@@ -2283,6 +2520,17 @@
 @media print {
   .mk-header {
     position: static;
+  }
+  /* No frame on paper: the rails, the crosshairs and the brackets go. */
+  .mk-page::before,
+  .mk-header::after,
+  .mk-section::after,
+  .mk-footer::before,
+  .mk-stage-frame::before {
+    display: none;
+  }
+  .mk-header-inner {
+    border-inline: 0;
   }
   .mk-window {
     break-inside: avoid;

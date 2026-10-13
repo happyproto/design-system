@@ -565,8 +565,11 @@ export function Feature({ which, ground, flip }: { which: keyof typeof features;
       data-ground={ground ? "surface" : undefined}
       data-flip={flip ? "" : undefined}
     >
-      <div className="mk-container mk-grid mk-feature-grid">
-        <div className="mk-feature-copy">
+      <div className="mk-container mk-grid mk-feature-grid mk-cells">
+        <div className="mk-feature-copy mk-cell-head">
+          <p className="mk-eyebrow" aria-hidden="true">
+            {f.eyebrow}
+          </p>
           <h2 className="mk-section-title" id={`${f.id}-title`}>
             {f.title}
           </h2>
@@ -843,7 +846,14 @@ export function LandingPage() {
                 <SignupBlock id="hero" anchor={hero.anchor} hero />
               </div>
             </div>
-            <Stage />
+            <div className="mk-stage-wrap">
+              <p className="mk-eyebrow" aria-hidden="true">
+                {stage.eyebrow}
+              </p>
+              <div className="mk-stage-frame">
+                <Stage />
+              </div>
+            </div>
             <Credentials />
           </div>
         </section>
@@ -851,8 +861,11 @@ export function LandingPage() {
         <Feature which="plugins" flip />
         <Feature which="upgrades" />
         <section className="mk-section mk-split" aria-labelledby="compare-title">
-          <div className="mk-container mk-grid mk-split-grid">
-            <div className="mk-section-head">
+          <div className="mk-container mk-grid mk-split-grid mk-cells">
+            <div className="mk-section-head mk-cell-head">
+              <p className="mk-eyebrow" aria-hidden="true">
+                {compare.eyebrow}
+              </p>
               <h2 className="mk-section-title" id="compare-title">
                 {compare.title}
               </h2>
@@ -861,8 +874,11 @@ export function LandingPage() {
           </div>
         </section>
         <section className="mk-section mk-split" id={faq.anchor} aria-labelledby="faq-title">
-          <div className="mk-container mk-grid mk-split-grid">
-            <div className="mk-section-head">
+          <div className="mk-container mk-grid mk-split-grid mk-cells">
+            <div className="mk-section-head mk-cell-head">
+              <p className="mk-eyebrow" aria-hidden="true">
+                {faq.eyebrow}
+              </p>
               <h2 className="mk-section-title" id="faq-title">
                 {faq.title}
               </h2>
