@@ -6,10 +6,23 @@
  * storybook-logo.css, which the page never ships.)
  *
  * Literal exceptions, each commented where it appears:
- * - layout widths and breakpoints (68rem container, 30rem form, 24rem URL
+ * - layout widths and breakpoints (78rem container, 36rem form, 24rem URL
  *   bar, 4rem header, and the .99rem max-width queries just under each
  *   step), the 40ch/60ch/65ch measures, 3ch for a code line's number and
  *   10ch for the URL bar's starting width;
+ * - the display H1 (v6): clamp() from text-4xl through 14vw to twice
+ *   text-4xl (6rem, 1.6x the old 3.75rem), at 1.05 leading and 1.5x the
+ *   tight tracking (-0.03em; the section headlines and the close take
+ *   the same). DESIGN.md's Fixed Scale Rule keeps the
+ *   *tokens* fixed rem steps; a viewport-wide hero headline is the one
+ *   place the brief asks for fluid type, and both ends are tokens;
+ * - the hero's and the close's backdrop (v6): a grid of 1px border-token
+ *   lines every 4rem (twice space-8), masked by a radial gradient from
+ *   black to transparent (mask values, not colours: a mask's alpha);
+ * - the comparison's HappyProto band (v6): light-dark() of the accent
+ *   surface mixed into the page ground, 10% in light and 45% in dark, the
+ *   tints at which fg-muted (pending rows) still clears 7:1 (7.23 and
+ *   7.4) and the accent tick clears 3:1;
  * - 100dvh for the page's minimum height;
  * - 1px hairlines, 2px focus rings and their 2px offset (and the FAQ
  *   target's 2px edge, the ring's width);
@@ -73,7 +86,11 @@
 
 .mk-page {
   /* Section rhythm: the space inside and between bands. */
-  --mk-gap-section: var(--hp-space-12);
+  --mk-gap-section: calc(2 * var(--hp-space-8));
+  /* The windows' lift, resolved here on the page so a window's own dark
+     scope (data-theme="dark") does not swap in the dark theme's heavier
+     shadow on a light page. */
+  --mk-window-shadow: var(--hp-shadow-modal);
   margin: 0;
   min-block-size: 100dvh;
   accent-color: var(--hp-color-accent);
@@ -90,9 +107,15 @@
   overflow-wrap: anywhere;
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 40rem) {
   .mk-page {
     --mk-gap-section: calc(2 * var(--hp-space-12));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mk-page {
+    --mk-gap-section: calc(3 * var(--hp-space-12));
   }
 }
 
@@ -119,7 +142,7 @@
 
 .mk-container {
   inline-size: 100%;
-  max-inline-size: 68rem; /* 1088px */
+  max-inline-size: 78rem; /* 1248px: the stage spans about 1200px */
   margin-inline: auto;
   padding-inline: var(--hp-space-4);
 }
@@ -446,6 +469,40 @@
   text-align: center;
 }
 
+/* The backdrop behind the hero and the close (data-backdrop on the
+   section): a faint grid in the hairline token, strongest at the top
+   centre and fading out radially toward the edges, so the page ends where
+   it began. Static, decorative (a pseudo-element: nothing for assistive
+   technology), under the content. In the hero the stage sits over the
+   fade, on the hero rather than under it. */
+[data-backdrop] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-backdrop]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--hp-color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hp-color-border) 1px, transparent 1px);
+  background-size: calc(2 * var(--hp-space-8)) calc(2 * var(--hp-space-8));
+  background-position: center top;
+  /* mask alpha, see header */
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 20%, transparent 100%);
+}
+
+/* The close's grid reaches up into the gap above it (the close shares
+   that gap with the FAQ, so it has no top padding of its own) and fades
+   out on every side from the middle, around the H2 and the form. */
+.mk-cta-section[data-backdrop]::before {
+  inset-block-start: calc(-1 * var(--mk-gap-section));
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 25%, transparent 100%);
+}
+
 /* The H1 and the sub fill the column (so a word wider than it, at enlarged
    text, breaks rather than overflow), their lines centred; the pill and the
    form are centred boxes. */
@@ -492,26 +549,22 @@
   line-height: var(--hp-leading-normal);
 }
 
-/* The display size (DESIGN.md's Display: 600, 3.75rem, 1.2, -0.02em), the
-   largest type on the page, from 40rem; a step down on a phone. A fixed
-   step, not clamp(). */
+/* The page's undisputed largest type: fluid from text-4xl on a small
+   phone, filling the width of a phone, to twice text-4xl (6rem) from about
+   690px wide, on one line at 1440. Tight leading and one and a half
+   times the tight tracking (see header). */
 .mk-title {
   margin: 0;
-  font-size: var(--hp-text-4xl);
+  font-size: clamp(var(--hp-text-4xl), 14vw, calc(2 * var(--hp-text-4xl)));
   font-weight: var(--hp-weight-semibold);
-  line-height: var(--hp-leading-tight);
-  letter-spacing: var(--hp-tracking-tight);
+  line-height: 1.05; /* display leading, see header */
+  letter-spacing: calc(1.5 * var(--hp-tracking-tight));
   text-wrap: balance;
   overflow-wrap: break-word;
 }
 
-@media (min-width: 40rem) {
-  .mk-title {
-    font-size: var(--hp-text-5xl);
-  }
-}
-
-/* The sub: the one line of value, muted, at the Title step. */
+/* The sub: the one line of value, muted, at the 2xl step (text-xl on a
+   phone). */
 .mk-lede {
   margin: 0;
   max-inline-size: 60ch;
@@ -521,6 +574,12 @@
   text-wrap: balance;
 }
 
+@media (min-width: 40rem) {
+  .mk-lede {
+    font-size: var(--hp-text-2xl);
+  }
+}
+
 /* The hero form, centred under the sub; its own contents read from the
    start edge, like the closing form's. */
 .mk-hero-signup {
@@ -528,8 +587,8 @@
   justify-self: center;
   gap: var(--hp-space-2);
   inline-size: 100%;
-  max-inline-size: 30rem; /* 480px, the form's width */
-  margin-block-start: var(--hp-space-4);
+  max-inline-size: 36rem; /* 576px, the form's width */
+  margin-block-start: var(--hp-space-6);
   text-align: start;
 }
 
@@ -559,24 +618,29 @@
 
 /* ---- Sample windows: the hero's stage and the three panels ------------------------- */
 
-/* A sample HappyView view built in HTML, so it stays crisp, follows the
-   theme and can play. A window: a hairline at radius-lg on the page ground
-   with the ambient shadow (DESIGN.md's card at rest), a bar with three
-   dots, the instance's URL and the `Sample` chip, then the body. Every
-   colour is a token and every word in it is 7:1 or better on its own
-   ground; colour comes from the content (type tags, the method badge, the
-   syntax, the status emoji). It is one image to assistive technology
-   (role="img" and its name), so nothing in it is a control. */
+/* A sample HappyView view built in HTML, so it stays crisp and can play.
+   The product glows: every window is dark in both themes (data-theme="dark"
+   on its root scopes the design system's dark tokens onto it), so on the
+   light page it is the deepest, most saturated object on the screen, and
+   on the dark page it sits a step up from the ground. A window: a hairline
+   at radius-lg on the panel ground, a large soft lift (the modal shadow,
+   resolved on the page: --mk-window-shadow), a highlight hairline along
+   its top edge, a bar with three dots, the instance's URL and the `Sample`
+   chip, then the body. Every colour is a token and every word in it is 7:1
+   or better on its own dark ground; colour comes from the content (type
+   tags, the method badge, the syntax at the dark theme's full strength,
+   the status emoji). It is one image to assistive technology (role="img"
+   and its name), so nothing in it is a control. */
 .mk-window {
   min-inline-size: 0;
   overflow: hidden; /* clips the bar and the footer to the corners */
   border: 1px solid var(--hp-color-border);
   border-radius: var(--hp-radius-lg);
-  background: var(--hp-color-bg);
-  box-shadow: var(--hp-shadow-ambient);
+  background: var(--hp-color-surface);
+  box-shadow: var(--mk-window-shadow);
   color: var(--hp-color-fg);
   font-size: var(--hp-text-sm);
-  line-height: var(--hp-leading-snug);
+  line-height: var(--hp-leading-normal);
   text-align: start;
   cursor: default;
 }
@@ -591,9 +655,11 @@
   flex-wrap: wrap; /* at enlarged text, the Sample chip moves to a line of its own */
   align-items: center;
   gap: var(--hp-space-3);
-  padding: var(--hp-space-2) var(--hp-space-3);
+  padding: var(--hp-space-3) var(--hp-space-4);
   border-block-end: 1px solid var(--hp-color-border);
   background: var(--hp-color-surface-raised);
+  /* The top edge's highlight: the strong hairline, inside the frame. */
+  box-shadow: inset 0 1px 0 var(--hp-color-border-strong);
 }
 
 .mk-window-dots {
@@ -603,8 +669,8 @@
 }
 
 .mk-window-dots span {
-  inline-size: var(--hp-space-2);
-  block-size: var(--hp-space-2);
+  inline-size: var(--hp-space-3);
+  block-size: var(--hp-space-3);
   border-radius: 50%;
   background: var(--hp-color-border-strong);
 }
@@ -620,8 +686,11 @@
   background: var(--hp-color-bg);
   color: var(--hp-color-fg);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* The `Sample` chip: says the data is a sample, in every window. */
@@ -632,7 +701,7 @@
   border-radius: var(--hp-radius-sm);
   background: var(--hp-color-bg);
   color: var(--hp-color-fg-muted);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-semibold);
   letter-spacing: var(--hp-tracking-wide);
   line-height: var(--hp-leading-normal);
@@ -648,7 +717,7 @@
   border-block-start: 1px solid var(--hp-color-border);
   background: var(--hp-color-surface-raised);
   color: var(--hp-color-fg-muted);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
 }
 
 /* A live state: a success dot, then the words in the ink. */
@@ -685,7 +754,7 @@
 .mk-path {
   min-inline-size: 0;
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   color: var(--hp-color-fg);
   overflow-wrap: anywhere;
 }
@@ -698,12 +767,13 @@
 .mk-tag {
   flex: 0 1 auto;
   min-inline-size: 0;
-  padding-inline: var(--hp-space-1);
+  padding-inline: var(--hp-space-2);
   border: 1px solid var(--hp-color-border-strong);
   border-radius: var(--hp-radius-sm);
   color: var(--hp-color-fg);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
   line-height: var(--hp-leading-normal);
 }
 
@@ -760,7 +830,7 @@
   gap: var(--hp-space-2);
   margin: 0;
   color: var(--hp-color-fg);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-semibold);
 }
 
@@ -770,24 +840,20 @@
 }
 
 /* Sample code: one line per item, a muted line number before it (CSS
-   counter), long lines soft-wrapped inside their own column so nothing
-   runs past the window. Keys, keywords and the handler's name in the
-   accent, strings in the second accent's ink, punctuation muted, the rest
-   in the ink; status emoji in their own colours. */
+   counter). Code never wraps: each line is set as written (white-space:
+   pre) and a line wider than its window is cut with an ellipsis inside its
+   own column, so nothing runs past the window and the page never scrolls
+   sideways. Keys, keywords and the handler's name in the accent, strings
+   in the second accent, punctuation muted, the rest in the ink (the dark
+   theme's values, at full strength); status emoji in their own colours. */
 .mk-src {
   margin: 0;
-  padding: var(--hp-space-3) 0;
+  padding: var(--hp-space-4) 0;
   list-style: none;
   counter-reset: mk-line;
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
-  line-height: var(--hp-leading-snug);
-}
-
-@media (min-width: 48rem) {
-  .mk-src {
-    font-size: var(--hp-text-sm);
-  }
+  font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-relaxed);
 }
 
 .mk-src-line {
@@ -808,9 +874,10 @@
 
 .mk-src-text {
   min-inline-size: 0;
+  overflow: hidden;
   color: var(--hp-color-fg);
-  white-space: break-spaces; /* its indent may wrap too, at enlarged text */
-  overflow-wrap: anywhere;
+  white-space: pre;
+  text-overflow: ellipsis;
 }
 
 .mk-t-key,
@@ -833,7 +900,10 @@
 }
 
 /* The stage: the Lexicons list beside the response from 48rem (two parts
-   to five), above it below. The list sits on the panel ground. */
+   to five). On a phone the list (decorative, and said in the stage's
+   name) gives its room to the response: hidden. The list sits on the page
+   ground, a step under the response's panel ground, like an editor's
+   sidebar. */
 .mk-stage-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -846,18 +916,17 @@
 }
 
 .mk-stage-side {
-  display: grid;
+  display: none;
   align-content: start;
-  gap: var(--hp-space-3);
-  padding: var(--hp-space-4);
-  border-block-end: 1px solid var(--hp-color-border);
-  background: var(--hp-color-surface);
+  gap: var(--hp-space-4);
+  padding: var(--hp-space-6) var(--hp-space-4);
+  border-inline-end: 1px solid var(--hp-color-border);
+  background: var(--hp-color-bg);
 }
 
 @media (min-width: 48rem) {
   .mk-stage-side {
-    border-block-end: 0;
-    border-inline-end: 1px solid var(--hp-color-border);
+    display: grid;
   }
 }
 
@@ -867,8 +936,8 @@
 
 .mk-lexicon {
   display: grid;
-  gap: var(--hp-space-1);
-  padding-block: var(--hp-space-2);
+  gap: var(--hp-space-2);
+  padding-block: var(--hp-space-3);
   border-block-start: 1px solid var(--hp-color-border);
 }
 
@@ -882,7 +951,7 @@
   gap: var(--hp-space-1);
   color: var(--hp-color-fg-muted);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
 }
 
 .mk-lexicon-meta[data-done] {
@@ -897,14 +966,15 @@
   padding: var(--hp-space-1) var(--hp-space-3);
   border: 1px solid var(--hp-color-border-strong);
   border-radius: var(--hp-radius-md);
-  background: var(--hp-color-bg);
+  background: var(--hp-color-surface);
   color: var(--hp-color-fg);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-medium);
 }
 
 .mk-stage-main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* a cut code line never widens it */
   align-content: start;
   min-inline-size: 0;
 }
@@ -917,6 +987,13 @@
   gap: var(--hp-space-2) var(--hp-space-3);
   padding: var(--hp-space-3) var(--hp-space-4);
   border-block-end: 1px solid var(--hp-color-border);
+  background: var(--hp-color-surface-raised);
+}
+
+@media (min-width: 40rem) {
+  .mk-request {
+    padding: var(--hp-space-4) var(--hp-space-6);
+  }
 }
 
 .mk-method {
@@ -926,25 +1003,35 @@
   background: var(--hp-color-accent-surface);
   color: var(--hp-color-accent-surface-fg);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-semibold);
   line-height: var(--hp-leading-normal);
 }
 
 .mk-request .mk-path {
   flex: 1;
+  overflow: hidden;
   font-size: var(--hp-text-sm);
+  white-space: nowrap; /* never wraps, like the code: cut with an ellipsis */
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 48rem) {
+  .mk-request .mk-path {
+    font-size: var(--hp-text-base);
+  }
 }
 
 .mk-http {
   display: inline-flex;
-  flex: none;
+  flex: 0 1 auto;
+  min-inline-size: 0; /* at 300% text on a phone, "200 OK" may wrap at its space */
   align-items: center;
   gap: var(--hp-space-2);
   margin-inline-start: auto;
   color: var(--hp-color-success);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-semibold);
 }
 
@@ -952,6 +1039,7 @@
 
 .mk-panel-body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* a cut code line never widens it */
   gap: var(--hp-space-3);
   padding: var(--hp-space-4);
 }
@@ -976,8 +1064,9 @@
 
 .mk-panel .mk-src {
   margin-inline: calc(-1 * var(--hp-space-4));
-  padding-block: var(--hp-space-2);
+  padding-block: var(--hp-space-3);
   border-block: 1px solid var(--hp-color-border);
+  background: var(--hp-color-bg);
 }
 
 @media (min-width: 40rem) {
@@ -999,7 +1088,7 @@
   padding: var(--hp-space-4);
   border: 1px solid var(--hp-color-border);
   border-radius: var(--hp-radius-md);
-  background: var(--hp-color-surface);
+  background: var(--hp-color-surface-raised);
 }
 
 .mk-job-head {
@@ -1023,7 +1112,7 @@
   block-size: var(--hp-space-2);
   overflow: hidden;
   border-radius: var(--hp-radius-sm);
-  background: var(--hp-color-surface-raised);
+  background: var(--hp-color-bg);
 }
 
 .mk-meter-fill {
@@ -1060,7 +1149,7 @@
   margin-inline-start: auto;
   color: var(--hp-color-fg-muted);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
 }
 
 .mk-counters {
@@ -1078,7 +1167,7 @@
 
 .mk-counter-label {
   color: var(--hp-color-fg-muted);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
 }
 
 .mk-counter-value {
@@ -1088,7 +1177,7 @@
 }
 
 .mk-counter-value .mk-figure {
-  font-size: var(--hp-text-xl);
+  font-size: var(--hp-text-2xl);
   font-weight: var(--hp-weight-semibold);
 }
 
@@ -1108,7 +1197,7 @@
   padding: var(--hp-space-3) var(--hp-space-4);
   border: 1px solid var(--hp-color-border);
   border-radius: var(--hp-radius-md);
-  background: var(--hp-color-surface);
+  background: var(--hp-color-surface-raised);
 }
 
 .mk-version[data-next] {
@@ -1117,13 +1206,13 @@
 
 .mk-version-label {
   color: var(--hp-color-fg-muted);
-  font-size: var(--hp-text-xs);
+  font-size: var(--hp-text-sm);
 }
 
 .mk-version-num {
   color: var(--hp-color-fg);
   font-family: var(--hp-font-mono);
-  font-size: var(--hp-text-2xl);
+  font-size: var(--hp-text-3xl);
   font-variant-numeric: var(--hp-font-numeric);
   font-weight: var(--hp-weight-semibold);
   line-height: var(--hp-leading-tight);
@@ -1154,7 +1243,7 @@
   padding: var(--hp-space-2) var(--hp-space-4);
   border: 1px solid var(--hp-color-fg-muted);
   border-radius: var(--hp-radius-md);
-  background: var(--hp-color-bg);
+  background: var(--hp-color-surface);
   color: var(--hp-color-fg);
   font-weight: var(--hp-weight-medium);
 }
@@ -1244,12 +1333,12 @@
   background: var(--hp-color-surface-raised);
 }
 
-/* Every section's headline: the point, big. DESIGN.md's Headline step
-   (2.25rem) from 40rem, a step over it (3rem) from 64rem, where it sits
-   beside its panel; a step under on a phone. Always under the H1. */
+/* Every section's headline: the point, at display size. DESIGN.md's
+   Display step (3.75rem) from 64rem, where it sits beside its panel; 3rem
+   from 40rem; 2.25rem on a phone. Always well under the H1 (6rem). */
 .mk-section-title {
   margin: 0;
-  font-size: var(--hp-text-2xl);
+  font-size: var(--hp-text-3xl);
   font-weight: var(--hp-weight-semibold);
   line-height: var(--hp-leading-tight);
   letter-spacing: var(--hp-tracking-tight);
@@ -1258,20 +1347,22 @@
 
 @media (min-width: 40rem) {
   .mk-section-title {
-    font-size: var(--hp-text-3xl);
+    font-size: var(--hp-text-4xl);
   }
 }
 
 @media (min-width: 64rem) {
   .mk-section-title {
-    font-size: var(--hp-text-4xl);
+    font-size: var(--hp-text-5xl);
+    line-height: 1.05; /* display leading, see header */
+    letter-spacing: calc(1.5 * var(--hp-tracking-tight));
   }
 }
 
 .mk-section-head {
   display: grid;
   align-content: start;
-  gap: var(--hp-space-4);
+  gap: var(--hp-space-3);
 }
 
 /* ---- One point per section ------------------------------------------------- */
@@ -1285,10 +1376,11 @@
   align-items: center;
 }
 
+/* The headline with its line close under it. */
 .mk-feature-copy {
   display: grid;
   align-content: start;
-  gap: var(--hp-space-4);
+  gap: var(--hp-space-3);
 }
 
 .mk-feature-line {
@@ -1296,7 +1388,14 @@
   max-inline-size: 40ch;
   color: var(--hp-color-fg-muted);
   font-size: var(--hp-text-lg);
+  line-height: var(--hp-leading-snug);
   text-wrap: pretty;
+}
+
+@media (min-width: 40rem) {
+  .mk-feature-line {
+    font-size: var(--hp-text-xl);
+  }
 }
 
 @media (min-width: 64rem) {
@@ -1337,10 +1436,18 @@
 /* ---- What HappyProto runs for you -------------------------------------------------- */
 
 /* A table at every width: the job, then a column of marks for HappyProto
-   and one for self-hosting, each mark centred in its column. */
+   and one for self-hosting, each mark centred in its column. HappyProto is
+   the column to want: it sits on a tinted accent band that runs from its
+   header to its last row, rounded at both ends (separate borders, so the
+   cells can round). */
 .mk-compare {
+  --mk-band: light-dark(
+    color-mix(in oklab, var(--hp-color-accent-surface) 10%, var(--hp-color-bg)),
+    color-mix(in oklab, var(--hp-color-accent-surface) 45%, var(--hp-color-bg))
+  ); /* see header */
   inline-size: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
   text-align: start;
 }
@@ -1348,10 +1455,35 @@
 .mk-compare th,
 .mk-compare td {
   padding: var(--hp-space-4) var(--hp-space-2);
-  border-block-end: 1px solid var(--hp-color-border-strong);
+  border-block-end: 1px solid var(--hp-color-border);
   vertical-align: middle;
   text-align: center;
   overflow-wrap: anywhere;
+}
+
+@media (min-width: 40rem) {
+  .mk-compare th,
+  .mk-compare td {
+    padding-block: var(--hp-space-6);
+  }
+}
+
+.mk-compare [data-col="hosted"] {
+  background: var(--mk-band);
+}
+
+.mk-compare thead th[data-col="hosted"] {
+  border-start-start-radius: var(--hp-radius-lg);
+  border-start-end-radius: var(--hp-radius-lg);
+}
+
+.mk-compare tbody tr:last-child [data-col="hosted"] {
+  border-end-start-radius: var(--hp-radius-lg);
+  border-end-end-radius: var(--hp-radius-lg);
+}
+
+.mk-compare tbody tr:last-child > * {
+  border-block-end: 0;
 }
 
 .mk-compare :is(thead, tbody) th:first-child {
@@ -1360,16 +1492,26 @@
 }
 
 .mk-compare thead th {
-  padding-block-start: 0;
+  padding-block: var(--hp-space-4);
   font-size: var(--hp-text-xs);
   font-weight: var(--hp-weight-semibold);
-  color: var(--hp-color-fg);
+  color: var(--hp-color-fg-muted);
 }
 
 @media (min-width: 30rem) {
   .mk-compare thead th {
     font-size: var(--hp-text-sm);
   }
+}
+
+@media (min-width: 64rem) {
+  .mk-compare thead th {
+    font-size: var(--hp-text-base);
+  }
+}
+
+.mk-compare thead th[data-col="hosted"] {
+  color: var(--hp-color-fg);
 }
 
 /* Fractions of the table, never rem: enlarged text cannot widen them. The
@@ -1394,19 +1536,16 @@
   }
 }
 
-.mk-compare thead th[data-col="hosted"] {
-  border-block-end: 2px solid var(--hp-color-accent);
-}
-
 .mk-compare tbody th {
   font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
   color: var(--hp-color-fg);
   text-wrap: pretty;
 }
 
 @media (min-width: 40rem) {
   .mk-compare tbody th {
-    font-size: var(--hp-text-lg);
+    font-size: var(--hp-text-xl);
   }
 }
 
@@ -1421,12 +1560,19 @@
 }
 
 /* A mark at a little over the text's size, decorative: the cell says "Yes"
-   or "No, you run it" to screen readers (visually hidden text). */
+   or "No, you run it" to screen readers (visually hidden text).
+   HappyProto's ticks are bigger (2em) and in the accent; the self-hosted
+   marks stay at 1.5em in the muted ink. */
 .mk-check {
   display: inline-block;
   inline-size: 1.5em; /* see header */
   block-size: 1.5em;
   vertical-align: middle;
+}
+
+.mk-compare td[data-col="hosted"] .mk-check {
+  inline-size: 2em; /* see header */
+  block-size: 2em;
 }
 
 /* ---- FAQ ------------------------------------------------------------------- */
@@ -1442,8 +1588,8 @@
   position: relative;
   display: grid;
   align-content: start;
-  gap: var(--hp-space-2);
-  padding-block: var(--hp-space-6);
+  gap: var(--hp-space-3);
+  padding-block: var(--hp-space-8);
   border-block-start: 1px solid var(--hp-color-border);
 }
 
@@ -1459,7 +1605,8 @@
 }
 
 .mk-faq-q {
-  font-size: var(--hp-text-lg);
+  font-size: var(--hp-text-xl);
+  line-height: var(--hp-leading-snug);
   font-weight: var(--hp-weight-semibold);
   color: var(--hp-color-fg);
   text-wrap: balance;
@@ -1512,7 +1659,7 @@
 .mk-faq-item:target::before {
   content: "";
   position: absolute;
-  inset-block: var(--hp-space-6);
+  inset-block: var(--hp-space-8);
   inset-inline-start: calc(-1 * var(--hp-space-3));
   inline-size: 2px; /* the focus ring's width, see header */
   background: var(--hp-color-accent);
@@ -1532,15 +1679,33 @@
 
 /* ---- Closing call to action ------------------------------------------------ */
 
-/* The close is a full-bleed band on the raised ground (data-ground="surface"
-   on its .mk-section), centred like the hero: the H1's words again as its
-   heading, then the closing form under it, centred, its contents reading
-   from the start edge. Nothing else. */
+/* The close is the finale: on the page ground with the hero's backdrop
+   (data-backdrop), centred like the hero: the H1's words again as its
+   heading at the display step, then the closing form under it, the hero's
+   form, centred, its contents reading from the start edge. Nothing else. */
 .mk-cta {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  row-gap: var(--hp-space-6);
+  row-gap: var(--hp-space-8);
   text-align: center;
+}
+
+.mk-cta .mk-section-title {
+  font-size: var(--hp-text-3xl);
+  line-height: 1.05; /* display leading, see header */
+  letter-spacing: calc(1.5 * var(--hp-tracking-tight));
+}
+
+@media (min-width: 40rem) {
+  .mk-cta .mk-section-title {
+    font-size: var(--hp-text-4xl);
+  }
+}
+
+@media (min-width: 64rem) {
+  .mk-cta .mk-section-title {
+    font-size: var(--hp-text-5xl);
+  }
 }
 
 /* The closing form, a centred box. */
@@ -1550,7 +1715,7 @@
   align-content: start;
   gap: var(--hp-space-2);
   inline-size: 100%;
-  max-inline-size: 30rem; /* 480px, the form's width */
+  max-inline-size: 36rem; /* 576px, the form's width */
   text-align: start;
 }
 
@@ -1571,7 +1736,7 @@
   align-content: start;
   gap: var(--hp-space-3);
   inline-size: 100%;
-  max-inline-size: 30rem; /* 480px */
+  max-inline-size: 36rem; /* 576px */
   font-size: var(--hp-text-sm);
   line-height: var(--hp-leading-normal);
 }
@@ -1582,11 +1747,12 @@
   gap: var(--hp-space-2);
 }
 
-/* A field and its button. Stacked on a phone; side by side from 30rem. */
+/* A field and its button. Stacked on a phone; side by side from 30rem,
+   the button as tall as the field. */
 .mk-signup-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  align-items: stretch;
   gap: var(--hp-space-2);
 }
 
@@ -1596,9 +1762,11 @@
   }
 }
 
-/* The note's Send is short: beside its field at every width. */
+/* The note's Send is short: beside its field at every width, at its own
+   height. */
 .mk-signup-note-fields .mk-signup-row {
   grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
 }
 
 .mk-signup-label {
@@ -1632,7 +1800,7 @@
   font: inherit;
   font-size: var(--hp-text-base);
   line-height: var(--hp-leading-normal);
-  padding: var(--hp-space-3);
+  padding: var(--hp-space-4);
   transition: border-color var(--hp-motion-duration-fast) var(--hp-motion-ease);
 }
 
@@ -1684,15 +1852,17 @@
     color var(--hp-motion-duration-fast) var(--hp-motion-ease);
 }
 
-/* Stacked under its field on a phone, the form's button is as wide as the
-   form, so its label never wraps at normal sizes; at 300% text it wraps
-   (balanced) rather than run past the button and the page. */
-@media (max-width: 29.99rem) {
-  .mk-signup-submit {
-    white-space: normal;
-    text-wrap: balance;
-  }
+/* The form's own button: the field's height and text size, wider. On one
+   line wherever it has the room; at enlarged text beside its field, its
+   label wraps (balanced) rather than push the form past the page. */
+.mk-signup-submit {
+  padding: var(--hp-space-4) var(--hp-space-6);
+  font-size: var(--hp-text-base);
+  font-weight: var(--hp-weight-semibold);
+  white-space: normal;
+  text-wrap: balance;
 }
+
 
 /* The primary button's hover stays in its own blue: one step toward the
    ink (darker in light, lighter in dark), so its white or near-black label

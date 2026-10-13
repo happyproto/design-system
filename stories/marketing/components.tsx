@@ -336,14 +336,14 @@ function Figure({ value, from }: { value: number; from: number }) {
  * its body (and an optional footer strip). One image to assistive
  * technology, named by `name`; its contents are aria-hidden (in case a
  * browser exposes an image's children), so its code is never read line by
- * line. A
- * `data-play` panel: it plays once as it comes into view (play.ts), its
+ * line. Always dark (data-theme="dark" scopes the dark tokens onto it):
+ * the product glows on the light page. A `data-play` panel: it plays once as it comes into view (play.ts), its
  * `data-step` parts arriving one after another; settled without
  * JavaScript, with reduced motion and in print.
  */
 function Window({ name, className, children, foot }: { name: string; className?: string; children: ReactNode; foot?: ReactNode }) {
   return (
-    <div className={`mk-window${className ? ` ${className}` : ""}`} role="img" aria-label={name} data-play="">
+    <div className={`mk-window${className ? ` ${className}` : ""}`} role="img" aria-label={name} data-play="" data-theme="dark">
       <div className="mk-window-content" aria-hidden="true">
         <div className="mk-window-bar">
           <span className="mk-window-dots">
@@ -831,7 +831,7 @@ export function LandingPage() {
     <div className="mk-page">
       <SiteHeader />
       <main className="mk-main" id="main" tabIndex={-1}>
-        <section className="mk-hero" aria-labelledby="hero-title">
+        <section className="mk-hero" aria-labelledby="hero-title" data-backdrop="">
           <div className="mk-container mk-hero-inner">
             <div className="mk-hero-copy">
               <HeroPill />
@@ -848,9 +848,9 @@ export function LandingPage() {
           </div>
         </section>
         <Feature which="network" />
-        <Feature which="plugins" ground flip />
+        <Feature which="plugins" flip />
         <Feature which="upgrades" />
-        <section className="mk-section mk-split" data-ground="surface" aria-labelledby="compare-title">
+        <section className="mk-section mk-split" aria-labelledby="compare-title">
           <div className="mk-container mk-grid mk-split-grid">
             <div className="mk-section-head">
               <h2 className="mk-section-title" id="compare-title">
@@ -870,7 +870,7 @@ export function LandingPage() {
             <Faq />
           </div>
         </section>
-        <section className="mk-section mk-cta-section" data-ground="surface">
+        <section className="mk-section mk-cta-section" data-backdrop="">
           <div className="mk-container mk-cta">
             <h2 className="mk-section-title" id="cta-title">
               {cta.title}
