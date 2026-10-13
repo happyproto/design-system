@@ -16,9 +16,12 @@
  *   the same). DESIGN.md's Fixed Scale Rule keeps the
  *   *tokens* fixed rem steps; a viewport-wide hero headline is the one
  *   place the brief asks for fluid type, and both ends are tokens;
- * - the hero's and the close's backdrop (v6): a grid of 1px border-token
- *   lines every 4rem (twice space-8), masked by a radial gradient from
- *   black to transparent (mask values, not colours: a mask's alpha);
+ * - the hero's and the close's backdrop: a honeycomb of 1px lines, cut
+ *   by a mask from an SVG hexagon tile (5rem across, 2.5 × space-8; a
+ *   pointy-top honeycomb repeats every √3 × its width, so 1.7320508)
+ *   intersected with a radial fade that peaks at 70% (mask values, not
+ *   colours: a mask's alpha), so the lines stay behind the type. The lines' colour is the hairline token, warmed toward the
+ *   accent near the top centre (color-mix, 55% at the heart);
  * - the comparison's HappyProto band (v6): light-dark() of the accent
  *   surface mixed into the page ground, 10% in light and 45% in dark, the
  *   tints at which fg-muted (pending rows) still clears 7:1 (7.23 and
@@ -470,14 +473,21 @@
 }
 
 /* The backdrop behind the hero and the close (data-backdrop on the
-   section): a faint grid in the hairline token, strongest at the top
-   centre and fading out radially toward the edges, so the page ends where
-   it began. Static, decorative (a pseudo-element: nothing for assistive
-   technology), under the content. In the hero the stage sits over the
-   fade, on the hero rather than under it. */
+   section): a faint honeycomb in the hairline token, its lines warming to
+   the accent around the headline and fading out radially toward the
+   edges, so the page ends where it began. The colour is the pseudo-
+   element's background; the hexagons and the fade are its mask, so every
+   colour stays a token. Static, decorative (a pseudo-element: nothing for
+   assistive technology), under the content. In the hero the stage sits
+   over the fade, on the hero rather than under it. */
 [data-backdrop] {
   position: relative;
   isolation: isolate;
+  --mk-hex-w: calc(2.5 * var(--hp-space-8));
+  --mk-hex-h: calc(1.7320508 * var(--mk-hex-w));
+  --mk-hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 96.995' preserveAspectRatio='none'%3E%3Cpath d='M28 0 56 16.166V48.497L28 64.663 0 48.497V16.166ZM28 64.663V96.995' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E");
+  --mk-hex-fade: radial-gradient(ellipse 70% 60% at 50% 0%, rgb(0 0 0 / 0.7) 15%, transparent 100%);
+  --mk-hex-heart: 50% 0%;
 }
 
 [data-backdrop]::before {
@@ -486,21 +496,30 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-image:
-    linear-gradient(var(--hp-color-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--hp-color-border) 1px, transparent 1px);
-  background-size: calc(2 * var(--hp-space-8)) calc(2 * var(--hp-space-8));
-  background-position: center top;
+  background: radial-gradient(
+    ellipse 45% 40% at var(--mk-hex-heart),
+    color-mix(in oklab, var(--hp-color-accent) 55%, var(--hp-color-border)),
+    var(--hp-color-border) 100%
+  );
   /* mask alpha, see header */
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 20%, transparent 100%);
+  mask-image: var(--mk-hex), var(--mk-hex-fade);
+  mask-size: var(--mk-hex-w) var(--mk-hex-h), 100% 100%;
+  mask-repeat: repeat, no-repeat;
+  mask-position: center top, 0 0;
+  mask-composite: intersect;
 }
 
-/* The close's grid reaches up into the gap above it (the close shares
-   that gap with the FAQ, so it has no top padding of its own) and fades
-   out on every side from the middle, around the H2 and the form. */
+/* The close's honeycomb reaches up into the gap above it (the close
+   shares that gap with the FAQ, so it has no top padding of its own) and
+   fades out on every side from the middle, around the H2 and the form;
+   its lines warm toward the accent there. */
+.mk-cta-section[data-backdrop] {
+  --mk-hex-fade: radial-gradient(ellipse 60% 50% at 50% 50%, rgb(0 0 0 / 0.7) 20%, transparent 100%);
+  --mk-hex-heart: 50% 50%;
+}
+
 .mk-cta-section[data-backdrop]::before {
   inset-block-start: calc(-1 * var(--mk-gap-section));
-  mask-image: radial-gradient(ellipse 60% 50% at 50% 50%, black 25%, transparent 100%);
 }
 
 /* The H1 and the sub fill the column (so a word wider than it, at enlarged
