@@ -47,7 +47,7 @@
  *
  * v8 (sell the backend, not the hosting): the page says what you can build
  * and what you get, to developers who aren't backend people and to people
- * drawn to atproto. The hero (a status pill, "You build the app. HappyProto
+ * drawn to atproto. The hero ("You build the app. HappyProto
  * runs the backend.", one line, the form and the product stage, a sample
  * HappyView view built in HTML); then four points, one per section, like
  * slides, each a headline, one line and one `Sample` panel that proves it
@@ -151,8 +151,6 @@ export const header = {
 };
 
 export const hero = {
-  /** Above the H1: a small DS chip, the status said in four words. "Beta" is its tag. */
-  pill: { tag: "Beta", text: "not open yet" },
   /**
    * The page's one H1, at the display size (v8): who does what, in two
    * sentences, each its own line from 40rem (two lines at 1440, broken

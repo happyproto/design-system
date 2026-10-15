@@ -599,14 +599,16 @@
 
 /* ---- Hero ----------------------------------------------------------------- */
 
-/* Centred, one column at every width, in markup order: the pill, the H1,
-   the sub and the form (its credit, the email promise, under it), then the
-   product stage at the content's full width. At 390x844, the pill, H1, sub
-   and form are in the first screen. Owner round 3: the old first-screen
-   rule (the stage's 200 and records) went, and its room went back to the
-   hero's parts as air: from 40rem, space-12 above the pill and space-6
-   between the pill, the H1, the sub and the form; the stage starts below
-   the middle of a desktop screen, its bar still in view. */
+/* Centred, one column at every width, in markup order: the H1, the sub
+   and the form (its credit, the email promise, under it), then the product
+   stage at the content's full width. At 390x844, the H1, sub and form are
+   in the first screen. Owner round 3: the old first-screen rule (the
+   stage's 200 and records) went, and its room went back to the hero's
+   parts as air: from 40rem, space-12 above the H1 (owner round 5: twice
+   that, taking the pill's room) and space-6 between the
+   H1, the sub and the form; the stage starts below the middle of a desktop
+   screen, its bar still in view. Owner round 5: the status pill above the
+   H1 went. */
 .mk-hero-inner {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -617,7 +619,7 @@
 @media (min-width: 40rem) {
   .mk-hero-inner {
     row-gap: var(--hp-space-12); /* owner round 4: white space between the hero's copy and the stage */
-    padding-block-start: var(--hp-space-12); /* owner round 3: back to space-12 (round 3 had cut it to space-8 for the first-screen rule) */
+    padding-block-start: calc(2 * var(--hp-space-12)); /* owner round 3: space-12; owner round 5: twice that, the pill's room, so the stage stays half below the fold */
   }
 }
 
@@ -630,7 +632,7 @@
 
 @media (min-width: 40rem) {
   .mk-hero-copy {
-    gap: var(--hp-space-6); /* owner round 3: air between the pill, the H1, the sub and the form */
+    gap: var(--hp-space-6); /* owner round 3: air between the H1, the sub and the form */
   }
 }
 
@@ -784,12 +786,8 @@
 }
 
 /* The H1 and the sub fill the column (so a word wider than it, at enlarged
-   text, breaks rather than overflow), their lines centred; the pill and the
-   form are centred boxes. */
-.mk-hero-copy > .mk-pill {
-  justify-self: center;
-}
-
+   text, breaks rather than overflow), their lines centred; the form is a
+   centred box. */
 .mk-hero-copy > .mk-lede {
   justify-self: center;
 }
@@ -836,37 +834,6 @@
     var(--mk-tick) 0 100% / 1px var(--mk-arm) no-repeat,
     var(--mk-tick) 100% 100% / var(--mk-arm) 1px no-repeat,
     var(--mk-tick) 100% 100% / 1px var(--mk-arm) no-repeat;
-}
-
-/* The status pill above the H1: a small chip on the panel ground with a
-   hairline, its tag ("Beta") a brand chip (accent-surface with its own
-   ink, the pair DESIGN.md solves at 7:1), the rest in the muted ink. */
-.mk-pill {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--hp-space-2);
-  max-inline-size: 100%;
-  margin: 0;
-  padding: var(--hp-space-1) var(--hp-space-3) var(--hp-space-1) var(--hp-space-1);
-  border: 1px solid var(--hp-color-border);
-  border-radius: var(--hp-radius-md);
-  background: var(--hp-color-surface);
-  color: var(--hp-color-fg-muted);
-  font-size: var(--hp-text-sm);
-  line-height: var(--hp-leading-snug);
-}
-
-.mk-pill-tag {
-  padding-inline: var(--hp-space-2);
-  border-radius: var(--hp-radius-sm);
-  background: var(--hp-color-accent-surface);
-  color: var(--hp-color-accent-surface-fg);
-  font-size: var(--hp-text-xs);
-  font-weight: var(--hp-weight-semibold);
-  letter-spacing: var(--hp-tracking-wide);
-  line-height: var(--hp-leading-normal);
 }
 
 /* The page's undisputed largest type (v8: two sentences, "You build the

@@ -1044,19 +1044,6 @@ export function SiteFooter() {
   );
 }
 
-/** The status pill above the H1: a small chip, its tag ("Beta") filled, the rest in the muted ink. */
-export function HeroPill() {
-  return (
-    <p className="mk-pill">
-      <span className="mk-pill-tag">{hero.pill.tag}</span>{" "}
-      <span className="mk-pill-sep" aria-hidden="true">
-        ·
-      </span>{" "}
-      <span>{hero.pill.text}</span>
-    </p>
-  );
-}
-
 /** The hero's one line of value (v8): what you get. */
 export function HeroSub() {
   return <p className="mk-lede">{hero.sub}</p>;
@@ -1085,7 +1072,6 @@ export function LandingPage() {
         <section className="mk-hero" aria-labelledby="hero-title" data-backdrop="">
           <div className="mk-container mk-hero-inner">
             <div className="mk-hero-copy">
-              <HeroPill />
               <HeroTitle />
               <HeroSub />
               <div className="mk-hero-signup">

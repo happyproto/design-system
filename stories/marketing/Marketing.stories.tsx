@@ -7,7 +7,6 @@ import {
   HeroCredit,
   Faq,
   Feature,
-  HeroPill,
   HeroSub,
   HeroTitle,
   LandingPage,
@@ -52,10 +51,9 @@ function InForm({ children }: { children: ReactNode }) {
 }
 
 export const HeroCopy: StoryObj = {
-  name: "Hero — the pill, the H1 (display size) and the sub",
+  name: "Hero — the H1 (display size) and the sub",
   render: () => (
     <div className="mk-hero-copy">
-      <HeroPill />
       <HeroTitle />
       <HeroSub />
     </div>
