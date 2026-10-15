@@ -1,22 +1,23 @@
 import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { hero } from "./content";
 import {
-  CompareTable,
-  Credentials,
+  CodePanel,
+  Crowd,
+  DataPanel,
+  HeroCredit,
   Faq,
   Feature,
   HeroPill,
   HeroSub,
+  HeroTitle,
   LandingPage,
-  NetworkPanel,
   NoscriptNote,
-  PluginsPanel,
+  SignInPanel,
   SignupForm,
   SiteFooter,
   SiteHeader,
+  SpacesPanel,
   Stage,
-  UpgradesPanel,
 } from "./components";
 
 // Every story sits on the page ground inside the container, except the full
@@ -55,7 +56,7 @@ export const HeroCopy: StoryObj = {
   render: () => (
     <div className="mk-hero-copy">
       <HeroPill />
-      <h1 className="mk-title">{hero.title}</h1>
+      <HeroTitle />
       <HeroSub />
     </div>
   ),
@@ -79,26 +80,47 @@ export const ProductStagePending: StoryObj = {
     </div>
   ),
 };
-export const PanelNetwork: StoryObj = { name: "Panel — Jetstream and a backfill job, settled", parameters: { column: true }, render: () => <NetworkPanel /> };
-export const PanelNetworkPending: StoryObj = {
-  name: "Panel — Jetstream and a backfill job, before it plays",
+export const PanelData: StoryObj = { name: "Panel 01 — Jetstream and a backfill job, settled", parameters: { column: true }, render: () => <DataPanel /> };
+export const PanelDataPending: StoryObj = {
+  name: "Panel 01 — Jetstream and a backfill job, before it plays",
   parameters: { column: true },
   render: () => (
     <div className="js-motion">
-      <NetworkPanel />
+      <DataPanel />
     </div>
   ),
 };
-export const PanelPlugins: StoryObj = { name: "Panel — a Lua script and a WASM plugin", parameters: { column: true }, render: () => <PluginsPanel /> };
-export const PanelUpgrades: StoryObj = { name: "Panel — an upgrade: snapshot taken, install or hold", parameters: { column: true }, render: () => <UpgradesPanel /> };
+export const PanelSpaces: StoryObj = { name: "Panel 02 — an atproto space: members, an invite, a record, settled", parameters: { column: true }, render: () => <SpacesPanel /> };
+export const PanelSpacesPending: StoryObj = {
+  name: "Panel 02 — an atproto space, before it plays",
+  parameters: { column: true },
+  render: () => (
+    <div className="js-motion">
+      <SpacesPanel />
+    </div>
+  ),
+};
+export const PanelSignIn: StoryObj = { name: "Panel 03 — an API client and an atproto sign-in, settled", parameters: { column: true }, render: () => <SignInPanel /> };
+export const PanelSignInPending: StoryObj = {
+  name: "Panel 03 — an API client and an atproto sign-in, before it plays",
+  parameters: { column: true },
+  render: () => (
+    <div className="js-motion">
+      <SignInPanel />
+    </div>
+  ),
+};
+export const PanelCode: StoryObj = { name: "Panel 04 — a TypeScript handler and the script languages", parameters: { column: true }, render: () => <CodePanel /> };
 export const FeatureSections: StoryObj = {
-  name: "Sections — one point each (headline, line, panel)",
+  name: "Sections — one point each (headline, line, panel), then the atproto crowd",
   parameters: { layout: "fullscreen", fullPage: true },
   render: () => (
     <div className="mk-page">
-      <Feature which="network" />
-      <Feature which="plugins" flip />
-      <Feature which="upgrades" />
+      <Feature which="data" />
+      <Feature which="spaces" />
+      <Feature which="signin" />
+      <Feature which="code" />
+      <Crowd />
     </div>
   ),
 };
@@ -170,26 +192,14 @@ export const SignupUnavailable: StoryObj = {
   render: () => <InForm><SignupForm id="unavailable" state="unavailable" /></InForm>,
 };
 
-export const CredentialLine: StoryObj = { name: "Credential line", render: () => <Credentials /> };
+export const HeroCreditLine: StoryObj = { name: "Hero credit (the email promise)", render: () => <HeroCredit /> };
 
 /**
  * Settled: as the page looks without JavaScript, with reduced motion, in
- * print, or once a row has arrived. Pending: under .js-motion, a row not yet
- * in view sits 8px low in the muted ink (full opacity, 7:1) with its ticks
- * small and muted; reveal.ts settles each one as it enters the viewport.
+ * print, or once an item has arrived. Pending: under .js-motion, an item not
+ * yet in view sits 8px low in the muted ink (full opacity, 7:1); reveal.ts
+ * settles each one as it enters the viewport.
  */
-export const Compare: StoryObj = {
-  name: "What HappyProto runs for you — settled",
-  render: () => <CompareTable />,
-};
-export const ComparePending: StoryObj = {
-  name: "What HappyProto runs for you — rows still to arrive",
-  render: () => (
-    <div className="js-motion">
-      <CompareTable />
-    </div>
-  ),
-};
 export const Questions: StoryObj = { name: "FAQ — settled", render: () => <Faq /> };
 export const QuestionsPending: StoryObj = {
   name: "FAQ — items still to arrive",

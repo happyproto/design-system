@@ -4,39 +4,35 @@
  * happyproto.at/src/components/*.astro mirror these one to one, with the same
  * elements, classes, attributes and order. SignupForm's markup is a contract
  * with happyproto.at/src/scripts/signup.ts; the `data-reveal` rows (the
- * table's and the FAQ's) with happyproto.at/src/scripts/reveal.ts; and the
- * `data-play` windows (the hero's stage and the three sample panels), their
+ * FAQ's) with happyproto.at/src/scripts/reveal.ts; and the `data-play`
+ * windows (the hero's stage and the four sample panels), their
  * `data-step` parts and `data-count-from` figures with
  * happyproto.at/src/scripts/play.ts. Change both together.
  *
- * Two deliberate differences. The release count is read from GitHub when
- * happyproto.at is built (src/lib/releases.ts); the story shows the
- * fallback. And the page's header logo is one <picture> (a dark-scheme
+ * One deliberate difference. The page's header logo is one <picture> (a dark-scheme
  * source over the light one, chosen by `prefers-color-scheme`), so the
  * browser fetches exactly one file; Storybook switches themes with
  * `data-theme` from its toolbar, which a media query can't see, so the
  * story keeps two logos and shows one, by the story-only rules in
  * storybook-logo.css (the page never ships them).
  */
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import {
-  compare,
-  credentials,
+  crowd,
   cta,
   faq,
   footer,
   header,
   hero,
-  leadingPunctuation,
   parts,
-  releaseCount,
+  sentences,
   shortAddress,
   signup,
-  slot,
+  softBreaks,
   type Line,
+  type NarrowLines,
   type Link,
   type SignupState,
-  CROSS,
   features,
   figure,
   stage,
@@ -100,7 +96,7 @@ const INVALID_VALUE: Record<InvalidMessage, string> = {
 
 const NOTE_TEXT = { open: "", sending: signup.note.sending, sent: signup.note.sent, unavailable: signup.note.unavailable };
 /** The note the stories send. */
-const SAMPLE_NOTE = "A book club on Statusphere";
+const SAMPLE_NOTE = "A reading app on Standard.Site";
 
 /** The address as signup.ts renders it: in full, or shortened on screen with the full one for screen readers. */
 function Address({ email }: { email: string }) {
@@ -294,68 +290,166 @@ function OkIcon() {
   );
 }
 
-/** One line of sample code: each token a span in its colour, after a line number (CSS). */
-function SourceLines({ lines }: { lines: Line[] }) {
+/** Critique round 10: not yet, a hollow ring at the text's size (the one pending glyph in every window). */
+function PendingIcon() {
+  return (
+    <svg className="mk-pending-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.25" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+/** Critique round 10: in progress, the ring half filled. */
+function RunningIcon() {
+  return (
+    <svg className="mk-running-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.25" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 4.75a3.25 3.25 0 0 1 0 6.5z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/**
+ * Critique round 10: a step's state mark, the pending ring and the tick in
+ * one cell. Pending (before its step lands) the ring shows; landed, and
+ * settled, the tick.
+ */
+function StateMark() {
+  return (
+    <span className="mk-mark">
+      <PendingIcon />
+      <OkIcon />
+    </span>
+  );
+}
+
+/** A long value with a <wbr> at each of its soft breaks (content.ts), where a phone may wrap it. */
+function Breakable({ text }: { text: string }) {
+  return (
+    <>
+      {softBreaks(text).map((piece, i) => (
+        <Fragment key={i}>
+          {i > 0 && <wbr />}
+          {piece}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
+/** One line's tokens, each a span in its colour; strings may wrap at their soft breaks. */
+function SourceText({ line }: { line: Line }) {
+  return (
+    <span className="mk-src-text">
+      {line.map(([kind, text], j) => (
+        <span className={`mk-t-${kind}`} key={j}>
+          {kind === "str" ? <Breakable text={text} /> : text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * One line of sample code per item, after a line number (CSS). With
+ * `narrow`, its lines `from` to `to` are marked data-wide and its own lines
+ * follow them, marked data-narrow: under 30rem CSS shows the narrow ones,
+ * wider the wide ones (round 1). Critique round 8: its first `open` lines
+ * are there from the start (not steps); `at` is the first step's moment.
+ */
+function SourceLines({ lines, narrow, at, open = 0 }: { lines: Line[]; narrow?: NarrowLines; at?: number; open?: number }) {
+  const wide = (i: number) => narrow !== undefined && i >= narrow.from && i < narrow.to;
   return (
     <ol className="mk-src">
       {lines.map((line, i) => (
-        <li className="mk-src-line" data-step="" key={i}>
-          <span className="mk-src-text">
-            {line.map(([kind, text], j) => (
-              <span className={`mk-t-${kind}`} key={j}>
-                {text}
-              </span>
+        <Fragment key={i}>
+          <li className="mk-src-line" data-step={i < open ? undefined : ""} data-at={i === open ? at : undefined} data-wide={wide(i) ? "" : undefined}>
+            <SourceText line={line} />
+          </li>
+          {narrow !== undefined &&
+            i === narrow.to - 1 &&
+            narrow.lines.map((l, k) => (
+              <li className="mk-src-line" data-step="" data-narrow="" key={`n${k}`}>
+                <SourceText line={l} />
+              </li>
             ))}
-          </span>
-        </li>
+        </Fragment>
       ))}
     </ol>
   );
 }
 
-/** A type or runtime tag: `record`, `query`, `procedure`, `Lua`, `auth`, `WASM`, `completed`. */
-function Tag({ kind, children }: { kind: string; children: ReactNode }) {
+/**
+ * A type or language tag: `record`, `query`, `procedure`, a script's
+ * language (`lang`; `current`, the file's own), a language still to come
+ * (`soon`), a member's access (`access`), a policy or client type
+ * (`policy`), a status (`running`, `done`).
+ */
+function Tag({ kind, current, children }: { kind: string; current?: boolean; children: ReactNode }) {
   return (
-    <span className="mk-tag" data-kind={kind}>
+    <span className="mk-tag" data-kind={kind} data-current={current ? "" : undefined}>
       {children}
     </span>
   );
 }
 
-/** A figure that ticks up from `from` to its own value as its panel plays (play.ts); settled, it is just the number. */
-function Figure({ value, from }: { value: number; from: number }) {
+/**
+ * A figure that ticks up from `from` to its own value as its panel plays (play.ts); settled, it is just the number.
+ * Round 2: `start` and `end` (ms) time its tick on the window's timeline; by default, from its step's landing to the window's end.
+ */
+function Figure({ value, from, start, end }: { value: number; from: number; start?: number; end?: number }) {
   return (
-    <span className="mk-figure" data-count-from={from}>
+    <span className="mk-figure" data-count-from={from} data-count-start={start} data-count-end={end}>
       {figure(value)}
     </span>
   );
 }
 
 /**
- * A sample window: three dots, the instance's URL and a `Sample` chip, then
- * its body (and an optional footer strip). One image to assistive
- * technology, named by `name`; its contents are aria-hidden (in case a
- * browser exposes an image's children), so its code is never read line by
- * line. Always dark (data-theme="dark" scopes the dark tokens onto it):
+ * A sample window: three dots, the instance's URL, an optional status strip
+ * (round 3: in the bar, it was a footer strip) and a `Sample` chip, then
+ * its body. One image to assistive technology, named by `name`; its
+ * contents are aria-hidden (in case a browser exposes an image's children),
+ * so its code is never read line by line, and inert (round 3), so nothing
+ * drawn in it (a button, a tab) can be clicked, focused or found. Always dark (data-theme="dark" scopes the dark tokens onto it):
  * the product glows on the light page. A `data-play` panel: it plays once as it comes into view (play.ts), its
  * `data-step` parts arriving one after another; settled without
- * JavaScript, with reduced motion and in print.
+ * JavaScript, with reduced motion and in print. `gap` (round 2): the ms
+ * between one step and the next where a step has no `data-at` of its own.
+ * `crumb` (critique round 7): a point panel's lighter bar, a breadcrumb
+ * into the instance (mono, muted) in place of the dots and the URL; the
+ * hero's stage keeps the full chrome. Its middle parts (`data-mid`) give
+ * way on a phone, so the instance and the page stay in view. The `Sample` chip is in every bar.
  */
-function Window({ name, className, children, foot }: { name: string; className?: string; children: ReactNode; foot?: ReactNode }) {
+function Window({ name, className, children, status, gap, crumb }: { name: string; className?: string; children: ReactNode; status?: ReactNode; gap?: number; crumb?: readonly string[] }) {
   return (
-    <div className={`mk-window${className ? ` ${className}` : ""}`} role="img" aria-label={name} data-play="" data-theme="dark">
-      <div className="mk-window-content" aria-hidden="true">
+    <div className={`mk-window${className ? ` ${className}` : ""}`} role="img" aria-label={name} data-play="" data-play-gap={gap} data-theme="dark">
+      <div className="mk-window-content" aria-hidden="true" inert>
         <div className="mk-window-bar">
-          <span className="mk-window-dots">
-            <span />
-            <span />
-            <span />
-          </span>
-          <span className="mk-window-url">{stage.url}</span>
+          {crumb ? (
+            <span className="mk-window-crumb">
+              {crumb[0]}
+              {crumb.slice(1).map((part, i) => (
+                <span key={part} className="mk-crumb-part" data-mid={i < crumb.length - 2 ? "" : undefined}>
+                  {" › "}
+                  {part}
+                </span>
+              ))}
+            </span>
+          ) : (
+            <>
+              <span className="mk-window-dots">
+                <span />
+                <span />
+                <span />
+              </span>
+              <span className="mk-window-url">{stage.url}</span>
+            </>
+          )}
+          {status}
           <span className="mk-sample">{stage.sample}</span>
         </div>
         {children}
-        {foot}
       </div>
     </div>
   );
@@ -364,28 +458,45 @@ function Window({ name, className, children, foot }: { name: string; className?:
 // ---- The hero's product stage ---------------------------------------------------------------
 
 /**
- * The Statusphere example as a HappyView instance shows it: the Lexicons
- * list (each NSID with its type, its Lua script, and the record lexicon's
- * finished backfill), and the listStatuses query answering 200. Under them,
- * a footer strip: Jetstream connected, and the records indexed, a count
- * that ticks up as the stage plays. Full content width under the form;
- * from 48rem the list sits beside the response, below it, above.
+ * A Standard.Site reader (owner round 3) as a HappyView instance shows it:
+ * the Lexicons list (each NSID with its type, its script's language (v8:
+ * TypeScript), and the record lexicons' finished backfills), and the
+ * app's listDocuments query answering 200 with a publication's documents. A status
+ * strip (round 3: in the window's bar, it was the footer): Jetstream
+ * connected, and the records indexed, a count that ticks up as the stage
+ * plays. Full content width under the form;
+ * from 48rem the list sits beside the response; below, it gives way to a
+ * line of each lexicon's name over the response (round 1; round 4: a plain
+ * list line, not tabs), and under
+ * 30rem the response shows one record, its long values wrapping at their
+ * soft breaks.
+ *
+ * Round 2: it plays "define your data, query your API" on `stage.play`'s timeline. The
+ * lexicons arrive (each list row, or the strip, is a step); the record
+ * lexicon's backfill runs through its statuses (a stack, `data-statuses`)
+ * while the indexed count ticks; then the request lands, then its 200 (a
+ * step of its own), then the records a line at a time. Round 3: the 200 and
+ * the response lines are absent (clipped, their room kept) until they
+ * arrive, and the request row never moves.
  */
 export function Stage() {
+  const play = stage.play;
+  const last = play.backfill.length - 1;
   return (
     <Window
       name={stage.name}
       className="mk-stage"
-      foot={
-        <div className="mk-window-foot">
+      gap={play.gap}
+      status={
+        <span className="mk-window-status">
           <span className="mk-live">
             <span className="mk-live-dot" />
             {stage.footer.jetstream} · {stage.footer.connected}
           </span>
           <span className="mk-indexed">
-            {stage.footer.indexed} <Figure value={stage.footer.count} from={stage.footer.from} />
+            {stage.footer.indexed} <Figure value={stage.footer.count} from={stage.footer.from} start={play.tick[0]} end={play.tick[1]} />
           </span>
-        </div>
+        </span>
       }
     >
       <div className="mk-window-body mk-stage-body">
@@ -395,166 +506,363 @@ export function Stage() {
             <span className="mk-panel-count">{stage.lexicons.rows.length}</span>
           </p>
           <div className="mk-lexicons">
-            {stage.lexicons.rows.map((row) => (
-              <div className="mk-lexicon" key={row.nsid}>
+            {stage.lexicons.rows.map((row, i) => (
+              <div className="mk-lexicon" data-step="" data-at={i * play.lexicon} key={row.nsid}>
                 <span className="mk-nsid">{row.nsid}</span>
                 <span className="mk-tags">
                   <Tag kind={row.type}>{row.type}</Tag>
-                  {row.lua && <Tag kind="lua">{stage.lexicons.lua}</Tag>}
-                  <span className="mk-lexicon-meta" data-done={row.done ? "" : undefined}>
-                    {row.done && <OkIcon />}
-                    {row.meta}
-                  </span>
+                  {row.script && <Tag kind="lang">{row.script}</Tag>}
+                  {row.playing ? (
+                    <span className="mk-lexicon-statuses" data-statuses="">
+                      {row.playing.map((label, k) => (
+                        <span
+                          className="mk-lexicon-meta"
+                          data-running={k > 0 ? "" : undefined}
+                          data-status-from={k > 0 ? play.backfill[k - 1] : undefined}
+                          data-status-to={play.backfill[k]}
+                          key={label}
+                        >
+                          {k > 0 ? <RunningIcon /> : <PendingIcon />}
+                          {label}
+                        </span>
+                      ))}
+                      <span className="mk-lexicon-meta" data-done={row.done ? "" : undefined} data-status-from={play.backfill[last]}>
+                        {row.done && <OkIcon />}
+                        {row.meta}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="mk-lexicon-meta" data-done={row.done ? "" : undefined}>
+                      {row.done && <OkIcon />}
+                      {row.meta}
+                    </span>
+                  )}
                 </span>
               </div>
             ))}
           </div>
-          <span className="mk-ghost-button">{stage.lexicons.add}</span>
+          <span className="mk-stage-add">
+            <svg className="mk-depicted-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 3.5v9M3.5 8h9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            {stage.lexicons.add}
+          </span>
         </div>
         <div className="mk-stage-main">
-          <div className="mk-request" data-step="">
+          <p className="mk-stage-names" data-step="">
+            <span className="mk-stage-names-title">{stage.lexicons.title}</span>
+            {stage.lexicons.rows.map((row) => (
+              <span className="mk-stage-name" data-current={stage.request.path.endsWith(row.nsid) ? "" : undefined} key={row.nsid}>
+                {row.nsid.split(".").pop()}
+              </span>
+            ))}
+          </p>
+          <div className="mk-request" data-step="" data-at={play.request}>
             <span className="mk-method">{stage.request.method}</span>
-            <span className="mk-path">{stage.request.path}</span>
-            <span className="mk-http">
-              <span className="mk-live-dot" />
+            <span className="mk-path">
+              <Breakable text={stage.request.path} />
+            </span>
+            <span className="mk-http" data-step="" data-at={play.ok}>
+              <OkIcon />
               {stage.request.status} {stage.request.statusText}
             </span>
           </div>
-          <SourceLines lines={stage.response} />
+          <SourceLines lines={stage.response} narrow={stage.responseNarrow} at={play.response} open={play.open} />
         </div>
       </div>
     </Window>
   );
 }
 
-// ---- One point per section: the three sample panels -------------------------------------------
-
-/** Jetstream connected, and the Statusphere record lexicon's backfill job through its stages, with its counters. */
-export function NetworkPanel() {
-  const n = features.network;
-  return (
-    <Window name={n.name} className="mk-panel">
-      <div className="mk-window-body mk-panel-body">
-        <div className="mk-panel-row" data-step="">
-          <span className="mk-live">
-            <span className="mk-live-dot" />
-            {n.jetstream.label}
-          </span>
-          <span className="mk-panel-state">{n.jetstream.state}</span>
-          <span className="mk-nsid">{n.jetstream.filter}</span>
-        </div>
-        <div className="mk-job">
-          <div className="mk-job-head" data-step="">
-            <span className="mk-job-title">{n.job.title}</span>
-            <span className="mk-nsid">{n.job.collection}</span>
-            <Tag kind="done">{n.job.status}</Tag>
-          </div>
-          <div className="mk-meter" data-step="">
-            <span className="mk-meter-fill" />
-          </div>
-          <ol className="mk-steps">
-            {n.job.stages.map((s) => (
-              <li className="mk-step" data-step="" key={s.id}>
-                <OkIcon />
-                <span className="mk-step-label">{s.label}</span>
-                <span className="mk-step-id">{s.id}</span>
-              </li>
-            ))}
-          </ol>
-          <div className="mk-counters">
-            {n.job.counters.map((c) => (
-              <div className="mk-counter" data-step="" key={c.field}>
-                <span className="mk-counter-label">{c.label}</span>
-                <span className="mk-counter-value">
-                  <Figure value={c.value} from={c.from} />
-                  {c.of !== undefined && <span className="mk-counter-of"> / {figure(c.of)}</span>}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </Window>
-  );
-}
-
-/** The listStatuses Lua script, then an installed WASM plugin. */
-export function PluginsPanel() {
-  const p = features.plugins;
-  return (
-    <Window name={p.name} className="mk-panel">
-      <div className="mk-window-body mk-panel-body">
-        <div className="mk-panel-row" data-step="">
-          <span className="mk-nsid">{p.file.nsid}</span>
-          <Tag kind={p.file.type}>{p.file.type}</Tag>
-          <Tag kind="lua">{p.file.lang}</Tag>
-        </div>
-        <SourceLines lines={p.code} />
-        <p className="mk-panel-head" data-step="">
-          <span>{p.plugins.title}</span>
-        </p>
-        {p.plugins.rows.map((row) => (
-          <div className="mk-panel-row mk-plugin" data-step="" key={row.name}>
-            <span className="mk-nsid">{row.name}</span>
-            <Tag kind={row.kind}>{row.kind}</Tag>
-            <Tag kind="wasm">{row.runtime}</Tag>
-            <span className="mk-ok">
-              <OkIcon />
-              {row.state}
-            </span>
-          </div>
-        ))}
-      </div>
-    </Window>
-  );
-}
-
-/** An available HappyView version, the snapshot already taken, and the two choices. */
-export function UpgradesPanel() {
-  const u = features.upgrades;
-  return (
-    <Window name={u.name} className="mk-panel">
-      <div className="mk-window-body mk-panel-body">
-        <p className="mk-panel-head" data-step="">
-          <span>{u.product}</span>
-        </p>
-        <div className="mk-versions" data-step="">
-          <span className="mk-version">
-            <span className="mk-version-label">{u.running.label}</span>
-            <span className="mk-version-num">{u.running.version}</span>
-          </span>
-          <svg className="mk-version-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M2.5 8h11M9.5 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="mk-version" data-next="">
-            <span className="mk-version-label">{u.available.label}</span>
-            <span className="mk-version-num">{u.available.version}</span>
-          </span>
-        </div>
-        <div className="mk-ok mk-snapshot" data-step="">
-          <OkIcon />
-          {u.snapshot}
-        </div>
-        <div className="mk-choices" data-step="">
-          <span className="mk-choice" data-primary="">
-            {u.install}
-          </span>
-          <span className="mk-choice">{u.hold}</span>
-        </div>
-      </div>
-    </Window>
-  );
-}
-
-const PANELS = { network: NetworkPanel, plugins: PluginsPanel, upgrades: UpgradesPanel };
+// ---- One point per section: the four sample panels --------------------------------------------
 
 /**
- * One point: a big headline, one short line and its panel. From 64rem the
- * copy takes five columns and the panel seven, side by side, the panel on
- * the right, or on the left where `flip` is set (the markup order, copy
- * then panel, is the reading order at every width). Below, stacked.
+ * 01 · Data: the documents' (site.standard.document) backfill job, in three parts
+ * (critique round 6): its head (the title, the collection and a badge), its
+ * two working stages in the dashboard's words, and one row of counters.
+ * Jetstream, connected, is in the window's bar, as on the hero's stage.
+ * The badge is two statuses stacked in one cell: `Running` until the last
+ * stage half lands (`data-step-last`, play.ts), then `Completed`, on the
+ * frame the counters settle. It plays within moments of coming into view,
+ * over about 2.3s (content.ts). Settled, it reads `Completed`.
  */
-export function Feature({ which, ground, flip }: { which: keyof typeof features; ground?: boolean; flip?: boolean }) {
+export function DataPanel() {
+  const n = features.data;
+  const last = n.job.stages[n.job.stages.length - 1].id;
+  return (
+    <Window
+      name={n.name}
+      className="mk-panel"
+      crumb={n.crumb}
+      status={
+        <span className="mk-window-status">
+          <span className="mk-live">
+            <span className="mk-live-dot" />
+            {n.jetstream.label} · {n.jetstream.state}
+          </span>
+        </span>
+      }
+    >
+      <div className="mk-window-body mk-panel-body mk-job">
+        <div className="mk-job-head" data-step="">
+          <span className="mk-job-title">{n.job.title}</span>
+          <span className="mk-nsid">{n.job.collection}</span>
+          <span className="mk-job-status" data-statuses="">
+            <span className="mk-tag" data-kind="running" data-status-to={last}>
+              <RunningIcon />
+              {n.job.status.running}
+            </span>
+            <span className="mk-tag" data-kind="done" data-status-from={last}>
+              <OkIcon />
+              {n.job.status.done}
+            </span>
+          </span>
+        </div>
+        <ol className="mk-steps">
+          {n.job.stages.map((s) => (
+            <li className="mk-step" data-step="" data-at={s.at} data-step-last={s.id === last ? "" : undefined} data-stage={s.id} key={s.id}>
+              <StateMark />
+              <span className="mk-step-label">{s.label}</span>
+            </li>
+          ))}
+        </ol>
+        <div className="mk-counters" data-step="" data-at={n.job.countersAt}>
+          {n.job.counters.map((c) => (
+            <div className="mk-counter" key={c.field}>
+              <span className="mk-counter-label">{c.label}</span>
+              <span className="mk-counter-value">
+                <Figure value={c.value} from={c.from} start={n.job.tickFrom} />
+                {c.of !== undefined && <span className="mk-counter-of"> / {figure(c.of)}</span>}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Window>
+  );
+}
+
+/** A member's or an invite's access: its `read` and `write` flags, each a tag when granted. */
+function Access({ read, write }: { read: boolean; write: boolean }) {
+  const a = features.spaces.access;
+  return (
+    <span className="mk-access">
+      {read && <Tag kind="access">{a.read}</Tag>}
+      {write && <Tag kind="access">{a.write}</Tag>}
+    </span>
+  );
+}
+
+/**
+ * 02 · Private data (v8): an atproto space on the instance, as the spaces
+ * API describes it. The bar says the feature is on (`atproto spaces ·
+ * enabled`, v3's default). The space's head (its display name, its type
+ * and key, and its member-list policy); its members, each with their
+ * `read` and `write` flags (the creator marked); its one invite (read
+ * access, its uses out of its maximum); and a draft document in the space,
+ * its at:// URI's `space` segment marked. It acts out the invite once
+ * (`features.spaces.play`): the invite's uses tick 0 to 1 and a third
+ * member lands with read access only, the members' count ticking 2 to 3,
+ * then the record lands. Settled: three members, the invite used once.
+ */
+export function SpacesPanel() {
+  const s = features.spaces;
+  const p = s.play;
+  return (
+    <Window
+      name={s.name}
+      className="mk-panel"
+      crumb={s.crumb}
+      gap={p.gap}
+      status={
+        <span className="mk-window-status">
+          <span className="mk-live">
+            <span className="mk-live-dot" />
+            {s.enabled.label} · {s.enabled.state}
+          </span>
+        </span>
+      }
+    >
+      <div className="mk-window-body mk-panel-body mk-space">
+        <div className="mk-space-head" data-step="">
+          <span className="mk-job-title">{s.space.name}</span>
+          <span className="mk-nsid">
+            {s.space.type} <span className="mk-space-key">· {s.space.skey}</span>
+          </span>
+          <Tag kind="policy">{s.space.policy}</Tag>
+        </div>
+        <div className="mk-space-part">
+          <p className="mk-panel-head" data-step="" data-at={p.members}>
+            <span>{s.members.title}</span>
+            <span className="mk-panel-count">
+              <Figure value={s.members.rows.length} from={s.members.from} start={p.counted[0]} end={p.counted[1]} />
+            </span>
+          </p>
+          <ul className="mk-members">
+            {s.members.rows.map((m) => (
+              <li className="mk-member" data-step="" data-at={m.invited ? p.joined : undefined} key={m.did}>
+                <span className="mk-nsid">{m.did}</span>
+                {m.creator && <span className="mk-member-note">{s.members.creator}</span>}
+                <Access read={m.read} write={m.write} />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mk-space-part">
+          <p className="mk-panel-head" data-step="" data-at={p.invites}>
+            <span>{s.invites.title}</span>
+          </p>
+          <div className="mk-member mk-invite" data-step="">
+            <span className="mk-invite-label">{s.invites.label}</span>
+            <span className="mk-invite-uses">
+              <Figure value={s.invites.uses} from={s.invites.from} start={p.used[0]} end={p.used[1]} /> / {s.invites.maxUses} {s.invites.unit}
+            </span>
+            <Access read={s.invites.read} write={s.invites.write} />
+          </div>
+        </div>
+        <div className="mk-space-part">
+          <p className="mk-panel-head" data-step="" data-at={p.records}>
+            <span>{s.records.title}</span>
+          </p>
+          <div className="mk-space-record" data-step="">
+            <span className="mk-space-doc">{s.records.doc}</span>
+            <span className="mk-nsid">{s.records.collection}</span>
+          </div>
+          <p className="mk-space-uri" data-step="">
+            <Breakable text={s.records.uri.before} />
+            <span className="mk-space-seg">{s.records.uri.segment}</span>
+            <Breakable text={s.records.uri.after} />
+          </p>
+        </div>
+      </div>
+    </Window>
+  );
+}
+
+/**
+ * 03 · Sign-in (v8): an API client on the instance's API Clients page (its
+ * name, its type, its `hvc_` client key, its allowed origin and its
+ * scopes), then a sign-in with an atproto handle, drawn (the field and the
+ * button are pictures, not controls: the window is inert), and its three
+ * steps as the browser SDK takes them, each ticking in turn: the handle
+ * resolved to a DID, authorized at the person's own PDS, the session
+ * registered. Settled, every step is ticked.
+ */
+export function SignInPanel() {
+  const s = features.signin;
+  return (
+    <Window name={s.name} className="mk-panel" crumb={s.crumb}>
+      <div className="mk-window-body mk-panel-body mk-signin">
+        <div className="mk-space-head" data-step="">
+          <span className="mk-job-title">{s.client.name}</span>
+          <Tag kind="policy">{s.client.type}</Tag>
+        </div>
+        <dl className="mk-fields">
+          {s.client.fields.map((f) => (
+            <div className="mk-field" data-step="" key={f.label}>
+              <dt>{f.label}</dt>
+              <dd className="mk-nsid">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <div className="mk-signin-box" data-step="" data-at={s.play.signIn}>
+          <span className="mk-signin-label">{s.signIn.label}</span>
+          <span className="mk-signin-row">
+            <span className="mk-signin-field">
+              <svg className="mk-depicted-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="8" cy="8" r="2.67" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M10.67 5.33v3.34a2 2 0 0 0 4 0V8a6.67 6.67 0 1 0-2.67 5.33" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="mk-nsid">{s.signIn.handle}</span>
+            </span>
+            <span className="mk-signin-button">
+              {s.signIn.button}
+              <svg className="mk-depicted-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2.5 8h11M9.5 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </span>
+        </div>
+        <ol className="mk-steps">
+          {s.steps.map((step) => (
+            <li className="mk-step" data-step="" data-at={step.at} data-stage={step.id} key={step.id}>
+              <StateMark />
+              <span className="mk-step-label">{step.label}</span>
+              {step.detail && <span className="mk-nsid mk-step-detail">{step.detail}</span>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </Window>
+  );
+}
+
+/**
+ * 04 · Your code (v8): the listDocuments handler in TypeScript, against the
+ * v3 script contract (`handle(input, ctx)`, the module's default export,
+ * reaching `happyview.db` by import), then the languages a handler can be
+ * written in: TypeScript (the file's own, marked), JavaScript and Lua
+ * today; Rust, Go, Zig and C/C++ outlined in dashes and marked `soon`.
+ */
+export function CodePanel() {
+  const c = features.code;
+  return (
+    <Window name={c.name} className="mk-panel" crumb={c.crumb}>
+      <div className="mk-window-body mk-panel-body">
+        <div className="mk-panel-row" data-step="">
+          <span className="mk-nsid">{c.file.nsid}</span>
+          <span className="mk-tags">
+            <Tag kind={c.file.type}>{c.file.type}</Tag>
+            <Tag kind="lang">{c.file.lang}</Tag>
+          </span>
+        </div>
+        <SourceLines lines={c.code} />
+        <p className="mk-panel-head" data-step="">
+          <span>{c.languages.title}</span>
+        </p>
+        <div className="mk-langs">
+          <span className="mk-langs-group" data-step="">
+            {c.languages.ready.map((lang) => (
+              <Tag kind="lang" current={lang === c.file.lang} key={lang}>
+                {lang}
+              </Tag>
+            ))}
+          </span>
+          <span className="mk-langs-group" data-step="">
+            {c.languages.soon.map((lang) => (
+              <Tag kind="soon" key={lang}>
+                {lang}
+              </Tag>
+            ))}
+            <span className="mk-langs-note">{c.languages.soonLabel}</span>
+          </span>
+        </div>
+      </div>
+    </Window>
+  );
+}
+
+const PANELS = { data: DataPanel, spaces: SpacesPanel, signin: SignInPanel, code: CodePanel };
+
+/**
+ * One point: a headline, one line and its panel. From 64rem the copy takes
+ * five columns and the panel seven, side by side, the panel on the right
+ * (round 2: no flipped row, so every split falls on the frame's one inner
+ * line, at 5/12). Critique round 6: the copy and the panel both start at
+ * the cell's top (the label's top on the window's), and the window is as
+ * tall as its content. Below, stacked. The copy is not sticky (owner round
+ * 2: only the FAQ's heading is).
+ */
+export function Feature({
+  which,
+  ground,
+  patch,
+}: {
+  which: keyof typeof features;
+  ground?: boolean;
+  /** Owner round 1: where this row's honeycomb patch sits (see "patches" in marketing.css); none if omitted. */
+  patch?: "low" | "corner";
+}) {
   const f = features[which];
   const Panel = PANELS[which];
   return (
@@ -563,7 +871,7 @@ export function Feature({ which, ground, flip }: { which: keyof typeof features;
       id={f.id}
       aria-labelledby={`${f.id}-title`}
       data-ground={ground ? "surface" : undefined}
-      data-flip={flip ? "" : undefined}
+      data-patch={patch}
     >
       <div className="mk-container mk-grid mk-feature-grid mk-cells">
         <div className="mk-feature-copy mk-cell-head">
@@ -581,105 +889,35 @@ export function Feature({ which, ground, flip }: { which: keyof typeof features;
   );
 }
 
-// ---- Credential line ------------------------------------------------------------------
+// ---- For the atproto crowd --------------------------------------------------------------
 
 /**
- * Under the hero's stage: one small muted row, centred where it fits on one
- * line (48rem), at every width. Where it comes from (plain text, no name or
- * link), the licence and the release cadence (a link to the releases it
- * counts, with the external-link icon). Apart by space and hairlines, never
- * bullets; the frame clips the hairline that would start a line
- * (marketing.css). `releaseTotal` is the count of stable releases the page
- * read from GitHub when it was built (also on the link as `data-total`, so
- * tests can tell a derived count from the fallback); the story leaves it out
- * and shows the fallback, as the page does when GitHub can't be read.
+ * v8: a short, unnumbered section after the four points, framed like them
+ * (a row of the frame, its headline cell beside its content on the inner
+ * rail from 64rem) but with no window: four terse items, each a bold label
+ * and a few words, in shared-border cells (two by two from 40rem, one
+ * column on a phone). Its own row height, not the points' minimum. Owner
+ * round 1's margin patch sits on its end rail.
  */
-export function Credentials({ releaseTotal }: { releaseTotal?: number | null }) {
+export function Crowd() {
   return (
-    <div className="mk-credentials">
-      <div className="mk-credentials-frame">
-        <ul role="list">
-          {credentials.items.map((item) => (
-            <li key={item}>
-              <span>{item}</span>
-            </li>
+    <section className="mk-section mk-crowd" id={crowd.id} aria-labelledby={`${crowd.id}-title`} data-patch="margin">
+      <div className="mk-container mk-grid mk-crowd-grid mk-cells">
+        <div className="mk-section-head mk-cell-head">
+          <h2 className="mk-section-title" id={`${crowd.id}-title`}>
+            {crowd.title}
+          </h2>
+        </div>
+        <dl className="mk-crowd-list">
+          {crowd.items.map((item) => (
+            <div className="mk-crowd-item" key={item.label}>
+              <dt>{item.label}</dt>
+              <dd>{item.text}</dd>
+            </div>
           ))}
-          <li>
-            <a className="mk-link" href={credentials.releases.href} data-total={releaseTotal ?? undefined}>
-              {releaseCount(releaseTotal)}
-              <ExternalIcon />
-            </a>
-          </li>
-        </ul>
+        </dl>
       </div>
-    </div>
-  );
-}
-
-// ---- What HappyProto runs for you ------------------------------------------------------
-
-/** A cell's mark: a tick or a cross at one weight, decorative; the cell says what it means to screen readers. */
-function Mark({ value }: { value: string }) {
-  return (
-    <>
-      <svg className="mk-check" viewBox="0 0 16 16" fill="none" aria-hidden="true" data-mark={value === CROSS ? "no" : "yes"}>
-        <path
-          d={value === CROSS ? "M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5" : "M3 8.5 6.5 12 13 4.5"}
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="mk-sr-only">{compare.marks[value].label}</span>
-    </>
-  );
-}
-
-/**
- * Named by its section's heading (`aria-labelledby="compare-title"`).
- * Explicit table roles throughout. A table at every width: the job, then
- * HappyProto's mark, then the self-hosted one, each column of marks
- * centred. Each row is a `data-reveal` row: it arrives as it enters the
- * viewport (reveal.ts), and its marks land with it.
- */
-export function CompareTable() {
-  return (
-    <table className="mk-compare" role="table" aria-labelledby="compare-title">
-      <colgroup>
-        <col className="mk-compare-col-what" />
-        <col className="mk-compare-col-hosted" />
-        <col className="mk-compare-col-self" />
-      </colgroup>
-      <thead role="rowgroup">
-        <tr role="row">
-          <th scope="col" role="columnheader">
-            <span className="mk-sr-only">{compare.columns.what}</span>
-          </th>
-          <th scope="col" role="columnheader" data-col="hosted">
-            {compare.columns.hosted}
-          </th>
-          <th scope="col" role="columnheader" data-col="self">
-            {compare.columns.self}
-          </th>
-        </tr>
-      </thead>
-      <tbody role="rowgroup">
-        {compare.rows.map((row) => (
-          <tr role="row" data-reveal="" key={row.what}>
-            <th scope="row" role="rowheader">
-              {row.what}
-            </th>
-            <td role="cell" data-col="hosted">
-              <Mark value={row.hosted} />
-            </td>
-            <td role="cell" data-col="self">
-              <Mark value={row.self} />
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    </section>
   );
 }
 
@@ -694,7 +932,7 @@ export function CompareTable() {
  * hover, out of sight (clipped, not faded) until the item is hovered, the
  * link is focused or the item is the page's target (which also gets a 2px
  * accent edge); on touch, always shown in the muted ink. One tab stop per
- * item. Each item is a `data-reveal` row, like the table's.
+ * item. Each item is a `data-reveal` row.
  */
 export function Faq() {
   return (
@@ -717,6 +955,15 @@ export function Faq() {
 }
 
 // ---- Chrome ------------------------------------------------------------------------------
+
+/**
+ * The hero's credit (round 5), under the form on the status line's reserved
+ * lines: the email promise's short form (critique round 10). v8: the
+ * promise alone; the maintainer credit and the release count went.
+ */
+export function HeroCredit() {
+  return <p className="mk-hero-credit">{hero.credit.promise}</p>;
+}
 
 /** External link: a box with an arrow leaving its corner, drawn at the link's text size. */
 function ExternalIcon() {
@@ -797,10 +1044,6 @@ export function SiteFooter() {
   );
 }
 
-const [subBefore, subRest] = slot(hero.sub, "host");
-// The full stop after the host travels with it, so it never starts a line.
-const [subPunct, subAfter] = leadingPunctuation(subRest);
-
 /** The status pill above the H1: a small chip, its tag ("Beta") filled, the rest in the muted ink. */
 export function HeroPill() {
   return (
@@ -814,17 +1057,22 @@ export function HeroPill() {
   );
 }
 
-/** The hero's one line of value, the host as unbreakable code with its full stop. */
+/** The hero's one line of value (v8): what you get. */
 export function HeroSub() {
+  return <p className="mk-lede">{hero.sub}</p>;
+}
+
+/** The H1 (v8): two sentences, each its own line from 40rem (`.mk-title-part`). */
+export function HeroTitle() {
   return (
-    <p className="mk-lede">
-      {subBefore}
-      <span className="mk-host">
-        <code className="mk-code">{hero.host}</code>
-        {subPunct}
-      </span>
-      {subAfter}
-    </p>
+    <h1 className="mk-title" id="hero-title">
+      {sentences(hero.title).map((part, i) => (
+        <Fragment key={part}>
+          {i > 0 && " "}
+          <span className="mk-title-part">{part}</span>
+        </Fragment>
+      ))}
+    </h1>
   );
 }
 
@@ -838,59 +1086,49 @@ export function LandingPage() {
           <div className="mk-container mk-hero-inner">
             <div className="mk-hero-copy">
               <HeroPill />
-              <h1 className="mk-title" id="hero-title">
-                {hero.title}
-              </h1>
+              <HeroTitle />
               <HeroSub />
               <div className="mk-hero-signup">
                 <SignupBlock id="hero" anchor={hero.anchor} hero />
+                <HeroCredit />
               </div>
             </div>
             <div className="mk-stage-wrap">
-              <p className="mk-eyebrow" aria-hidden="true">
-                {stage.eyebrow}
-              </p>
               <div className="mk-stage-frame">
                 <Stage />
               </div>
             </div>
-            <Credentials />
           </div>
         </section>
-        <Feature which="network" />
-        <Feature which="plugins" flip />
-        <Feature which="upgrades" />
-        <section className="mk-section mk-split" aria-labelledby="compare-title">
+        <Feature which="data" patch="low" />
+        <Feature which="spaces" patch="corner" />
+        <Feature which="signin" />
+        <Feature which="code" />
+        <Crowd />
+        <section className="mk-section mk-split" id={faq.anchor} aria-labelledby="faq-title" data-patch="head">
           <div className="mk-container mk-grid mk-split-grid mk-cells">
             <div className="mk-section-head mk-cell-head">
-              <p className="mk-eyebrow" aria-hidden="true">
-                {compare.eyebrow}
-              </p>
-              <h2 className="mk-section-title" id="compare-title">
-                {compare.title}
-              </h2>
-            </div>
-            <CompareTable />
-          </div>
-        </section>
-        <section className="mk-section mk-split" id={faq.anchor} aria-labelledby="faq-title">
-          <div className="mk-container mk-grid mk-split-grid mk-cells">
-            <div className="mk-section-head mk-cell-head">
-              <p className="mk-eyebrow" aria-hidden="true">
-                {faq.eyebrow}
-              </p>
               <h2 className="mk-section-title" id="faq-title">
                 {faq.title}
               </h2>
+              <p className="mk-section-help">
+                <Linked text={faq.help.text} links={faq.help.links} />
+              </p>
             </div>
             <Faq />
           </div>
         </section>
-        <section className="mk-section mk-cta-section" data-backdrop="">
+        <section className="mk-section mk-cta-section" aria-labelledby="cta-title" data-backdrop="">
           <div className="mk-container mk-cta">
             <h2 className="mk-section-title" id="cta-title">
-              {cta.title}
+              {sentences(cta.title).map((part, i) => (
+                <Fragment key={part}>
+                  {i > 0 && " "}
+                  <span className="mk-cta-title-part">{part}</span>
+                </Fragment>
+              ))}
             </h2>
+            <p className="mk-cta-line">{cta.line}</p>
             <div className="mk-cta-signup">
               <SignupBlock id="footer" anchor={cta.anchor} />
             </div>
