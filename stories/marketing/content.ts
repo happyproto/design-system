@@ -92,7 +92,6 @@ export type SignupMessage =
 
 export type Link = { label: string; href: string };
 
-const REPO = "https://github.com/gamesgamesgamesgamesgames/happyview";
 const DOCS = "https://happyview.dev";
 const BLUESKY = {
   label: "@happyproto.at",
@@ -1029,16 +1028,20 @@ export const cta = {
   formName: "Join the beta (end of page)",
 };
 
-/** Every footer link is off-site, so every one carries the external-link icon. */
+export type FooterIcon = "docs" | "bluesky" | "discord";
+
+/**
+ * Owner round 7: one word each, after its icon (`icon`: the docs' book, the
+ * Bluesky and Discord marks). GitHub is gone; the brand marks say where each
+ * link goes, so the external-link icon is gone too.
+ */
 export const footer = {
   copyright: "© HappyProto",
   links: [
-    { label: "HappyView on GitHub", href: REPO },
-    { label: "HappyView docs", href: DOCS },
-    { label: "@happyproto.at on Bluesky", href: BLUESKY.href },
-    /** "Discord" alone: with "HappyProto" the four links no longer fit one row beside the rail (701px in 664px). */
-    { label: "Discord", href: DISCORD.href },
-  ] as Link[],
+    { label: "Docs", href: DOCS, icon: "docs" },
+    { label: "Bluesky", href: BLUESKY.href, icon: "bluesky" },
+    { label: "Discord", href: DISCORD.href, icon: "discord" },
+  ] as (Link & { icon: FooterIcon })[],
 };
 
 /**
