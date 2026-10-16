@@ -897,7 +897,7 @@ export function Feature({
   );
 }
 
-// ---- For the atproto crowd --------------------------------------------------------------
+// ---- Other features ---------------------------------------------------------------------
 
 /**
  * v8: a short, unnumbered section after the four points, framed like them

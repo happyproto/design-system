@@ -165,12 +165,13 @@ export const hero = {
    * The one line of value: who does what (the old H1's "HappyProto runs
    * the backend", now that the H1 is the tagline), then what you get.
    * "46 million" is the owner's network-size claim (the low end of
-   * Bluesky's published figures); auth (sign-in), private data and
-   * scripting are the points 03, 02 and 04 prove, and the API over the
-   * network is 01's. "atproto" is left to the H1 right above it, which
+   * Bluesky's published figures); the API over the network is 01's, and
+   * auth (sign-in), private data and scripting are the points 03, 02 and
+   * 04 prove. Feedback round 1: the painkillers (the API, auth) lead, the
+   * vitamins follow. "atproto" is left to the H1 right above it, which
    * keeps the page under its word budget.
    */
-  sub: "HappyProto runs the backend: auth, private data, scripting, and an API over 46 million accounts.",
+  sub: "HappyProto runs the backend: an API over 46 million accounts, auth, private data, and scripting.",
   /** The hero form's id, so the page can be linked to it. */
   anchor: "join",
   /** The hero form's accessible name (a form landmark). The hero form has no helper: its status line is empty at rest. */
@@ -782,7 +783,8 @@ export const features = {
 };
 
 /**
- * For the atproto crowd (v8): a short, unnumbered section after the four
+ * Other features (v8; feedback round 1 retitled it from "For the atproto
+ * crowd", which every reader already is): a short, unnumbered section after the four
  * points, framed like them but with no window, for readers who already
  * know atproto. Four terse items, a bold label and a few words each.
  * Sources: network lexicons are fetched by NSID and kept up to date through
@@ -795,7 +797,7 @@ export const features = {
  */
 export const crowd = {
   id: "atproto",
-  title: "For the atproto crowd",
+  title: "Other features",
   items: [
     {
       label: "Network lexicons",
