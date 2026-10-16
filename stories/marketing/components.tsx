@@ -1092,8 +1092,8 @@ export function LandingPage() {
           </div>
         </section>
         <Feature which="data" patch="low" />
-        <Feature which="spaces" patch="corner" />
-        <Feature which="signin" />
+        <Feature which="signin" patch="corner" />
+        <Feature which="spaces" />
         <Feature which="code" />
         <Crowd />
         <section className="mk-section mk-split" id={faq.anchor} aria-labelledby="faq-title" data-patch="head">

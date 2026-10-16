@@ -115,8 +115,8 @@ export const FeatureSections: StoryObj = {
   render: () => (
     <div className="mk-page">
       <Feature which="data" />
-      <Feature which="spaces" />
       <Feature which="signin" />
+      <Feature which="spaces" />
       <Feature which="code" />
       <Crowd />
     </div>

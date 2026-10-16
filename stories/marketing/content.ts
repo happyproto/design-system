@@ -51,7 +51,7 @@
  * parts.", one line, the form and the product stage, a sample
  * HappyView view built in HTML); then four points, one per section, like
  * slides, each a headline, one line and one `Sample` panel that proves it
- * (01 Data, 02 Private data, 03 Sign-in, 04 Your code); then a short
+ * (01 Data, 02 Sign-in, 03 Private data, 04 Your code); then a short
  * unnumbered section for the atproto crowd, the FAQ and the close. Sample
  * panels show only what HappyView really does, as documented: no customer
  * names, no performance, uptime or latency figures. The $10 target is said
@@ -166,8 +166,9 @@ export const hero = {
    * the backend", now that the H1 is the tagline), then what you get.
    * "46 million" is the owner's network-size claim (the low end of
    * Bluesky's published figures); the API over the network is 01's, and
-   * auth (sign-in), private data and scripting are the points 03, 02 and
-   * 04 prove. Feedback round 1: the painkillers (the API, auth) lead, the
+   * auth (sign-in), private data and scripting are the points 02, 03 and
+   * 04 prove (feedback round 1: the painkillers first, so sign-in moved up
+   * to 02). Feedback round 1: the painkillers (the API, auth) lead, the
    * vitamins follow. "atproto" is left to the H1 right above it, which
    * keeps the page under its word budget.
    */
@@ -538,7 +539,7 @@ export const features = {
    */
   spaces: {
     id: "spaces",
-    eyebrow: "02 · Private data",
+    eyebrow: "03 · Private data",
     title: "Private data, today.",
     line: "atproto spaces keep permissioned data next to public records.",
     name: "Sample atproto space on your-app: three members with their read and write access, an invite used once, and a draft document kept in the space.",
@@ -623,7 +624,7 @@ export const features = {
    */
   signin: {
     id: "sign-in",
-    eyebrow: "03 · Sign-in",
+    eyebrow: "02 · Sign-in",
     title: "Sign-in, minus the OAuth work.",
     line: "atproto OAuth is set up for you. People log in with the account they already have.",
     name: "Sample API client for your-app: a public client with its hvc_ client key, allowed origin and atproto scope, then a sign-in with an atproto handle: the handle resolved, authorized at the PDS, and the session registered.",
