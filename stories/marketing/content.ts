@@ -378,7 +378,7 @@ export const stage = {
     connected: "connected",
     indexed: "Records indexed",
     /** The count the stage settles on, and where its tick starts (round 2: none yet, the backfill fills it; play.ts holds the settled width, so it never reflows). */
-    count: 1284,
+    count: 48_213_906,
     from: 0,
   },
   /**
@@ -413,7 +413,7 @@ export const stage = {
   },
 };
 
-/** A number as the panels write it: thousands apart by commas ("1,284"). */
+/** A number as the panels write it: thousands apart by commas ("48,213,906"). Owner round 6: the samples' figures are network-sized, millions where they fit. */
 export function figure(n: number): string {
   return n.toLocaleString("en-US");
 }
@@ -482,9 +482,9 @@ export const features = {
         {
           field: "processed_repos",
           label: "Repos",
-          value: 412,
+          value: 1_284_517,
           from: 0,
-          of: 412,
+          of: 1_284_517,
         },
         {
           field: "total_records",

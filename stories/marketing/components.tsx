@@ -639,7 +639,7 @@ export function DataPanel() {
               <span className="mk-counter-label">{c.label}</span>
               <span className="mk-counter-value">
                 <Figure value={c.value} from={c.from} start={n.job.tickFrom} />
-                {c.of !== undefined && <span className="mk-counter-of"> / {figure(c.of)}</span>}
+                {c.of !== undefined && <>{" "}<span className="mk-counter-of">/ {figure(c.of)}</span></>}
               </span>
             </div>
           ))}

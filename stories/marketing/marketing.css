@@ -1750,12 +1750,37 @@
   color: var(--hp-color-fg);
 }
 
+/* Two counters, each half the row. Owner round 6: the figures run to the
+   millions, so the row follows its panel's width in the panel's em (which
+   grows with the text, zoomed or not): narrower than two figures, the
+   second goes under the first; narrower than one, a figure breaks rather
+   than run off the page. */
 .mk-counters {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--hp-space-3);
   padding-block-start: var(--hp-space-3);
   border-block-start: 1px solid var(--hp-color-border);
+}
+
+@container mk-panel (max-width: 20em) {
+  .mk-counters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container mk-panel (max-width: 11em) {
+  .mk-counters .mk-counter-value .mk-figure,
+  .mk-counters .mk-counter-of {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* play.ts holds a figure at its settled width (an inline style) so the
+     row never reflows as it ticks; here that width is wider than the row. */
+  .mk-counters .mk-counter-value .mk-figure {
+    min-inline-size: 0 !important;
+  }
 }
 
 .mk-counter {
@@ -1777,6 +1802,28 @@
 .mk-counter-value .mk-figure {
   font-size: var(--hp-text-2xl);
   font-weight: var(--hp-weight-semibold);
+  white-space: nowrap; /* owner round 6: in the millions; see .mk-counters */
+}
+
+/* Its total ("/ 1,284,517") wraps as one, under the figure where the two
+   don't fit side by side. */
+.mk-counter-of {
+  white-space: nowrap;
+}
+
+/* Owner round 6: at the millions two figures side by side need a smaller
+   size on a phone, smaller again at the narrowest, so each stays on one
+   line in its half of the row. */
+@media (max-width: 29.99rem) {
+  .mk-counter-value .mk-figure {
+    font-size: var(--hp-text-xl);
+  }
+}
+
+@media (max-width: 22.49rem) {
+  .mk-counter-value .mk-figure {
+    font-size: var(--hp-text-lg);
+  }
 }
 
 /* 02 · Private data (v8): an atproto space, in three parts under its head
