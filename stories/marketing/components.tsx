@@ -973,23 +973,8 @@ export function HeroCredit() {
   return <p className="mk-hero-credit">{hero.credit.promise}</p>;
 }
 
-/**
- * A footer link's icon, at the link's text size, in its ink: the docs' book
- * (Lucide's book-open) or the Bluesky or Discord mark (Simple Icons).
- */
+/** A footer link's mark, in the link's ink: Bluesky's or Discord's (Simple Icons). */
 function FooterIcon({ icon }: { icon: FooterIconName }) {
-  if (icon === "docs")
-    return (
-      <svg className="mk-link-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
   return (
     <svg className="mk-link-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d={icon === "bluesky" ? BLUESKY_MARK : DISCORD_MARK} />
@@ -1052,9 +1037,9 @@ export function SiteFooter() {
         <ul className="mk-footer-links" role="list">
           {footer.links.map((link) => (
             <li key={link.href}>
-              <a className="mk-link" href={link.href}>
+              <a className="mk-link mk-footer-icon" href={link.href}>
                 <FooterIcon icon={link.icon} />
-                {link.label}
+                <span className="mk-sr-only">{link.label}</span>
               </a>
             </li>
           ))}

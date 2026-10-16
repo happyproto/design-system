@@ -98,8 +98,8 @@
  * point's headline beside its panel, and the crowd's and the FAQ's
  * headlines beside their content, and steps the headlines up again.
  *
- * Off-site links: the footer's each lead with the icon of where they go
- * (the docs' book, the Bluesky and Discord marks); links inside a
+ * Off-site links: the footer's are the Bluesky and Discord marks alone,
+ * named for screen readers; links inside a
  * sentence stay unmarked, so prose reads as prose.
  *
  * Orange (the second brand hue) is reserved for attention in the chrome:
@@ -3031,15 +3031,29 @@
   margin: 0;
 }
 
-/* role="list" in the markup keeps it a list in WebKit without its markers. */
+/* role="list" in the markup keeps it a list in WebKit without its markers.
+   The negative margins put the marks' outer edges on the column's edges,
+   not the 44px targets'. */
 .mk-footer-links {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0 var(--hp-space-6);
-  margin: 0;
+  gap: 0 var(--hp-space-2);
+  margin: 0 calc((var(--mk-footer-mark) - 2.75rem) / 2);
   padding: 0;
   list-style: none;
+  --mk-footer-mark: 1.25rem;
+}
+
+/* A mark alone: a 44px square target (WCAG 2.5.5) with the mark centred. */
+.mk-footer-icon {
+  justify-content: center;
+  min-inline-size: 2.75rem;
+}
+
+.mk-footer-icon .mk-link-icon {
+  inline-size: var(--mk-footer-mark);
+  block-size: var(--mk-footer-mark);
 }
 
 /* ---- Scroll reveal ------------------------------------------------------------ */

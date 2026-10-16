@@ -92,7 +92,6 @@ export type SignupMessage =
 
 export type Link = { label: string; href: string };
 
-const DOCS = "https://happyview.dev";
 const BLUESKY = {
   label: "@happyproto.at",
   href: "https://bsky.app/profile/happyproto.at",
@@ -1028,19 +1027,18 @@ export const cta = {
   formName: "Join the beta (end of page)",
 };
 
-export type FooterIcon = "docs" | "bluesky" | "discord";
+export type FooterIcon = "bluesky" | "discord";
 
 /**
- * Owner round 7: one word each, after its icon (`icon`: the docs' book, the
- * Bluesky and Discord marks). GitHub is gone; the brand marks say where each
- * link goes, so the external-link icon is gone too.
+ * Owner round 7: the social links only, each its mark alone (`icon`: Bluesky,
+ * Discord). GitHub and the docs are gone. `label` is the link's name, said
+ * but not shown (visually hidden).
  */
 export const footer = {
   copyright: "© HappyProto",
   links: [
-    { label: "Docs", href: DOCS, icon: "docs" },
-    { label: "Bluesky", href: BLUESKY.href, icon: "bluesky" },
-    { label: "Discord", href: DISCORD.href, icon: "discord" },
+    { label: "HappyProto on Bluesky", href: BLUESKY.href, icon: "bluesky" },
+    { label: "HappyProto on Discord", href: DISCORD.href, icon: "discord" },
   ] as (Link & { icon: FooterIcon })[],
 };
 
