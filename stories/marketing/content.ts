@@ -47,8 +47,8 @@
  *
  * v8 (sell the backend, not the hosting): the page says what you can build
  * and what you get, to developers who aren't backend people and to people
- * drawn to atproto. The hero ("You build the app. HappyProto
- * runs the backend.", one line, the form and the product stage, a sample
+ * drawn to atproto. The hero ("Build on atproto without the hard
+ * parts.", one line, the form and the product stage, a sample
  * HappyView view built in HTML); then four points, one per section, like
  * slides, each a headline, one line and one `Sample` panel that proves it
  * (01 Data, 02 Private data, 03 Sign-in, 04 Your code); then a short
@@ -119,13 +119,13 @@ const TUTORIAL = {
 export const meta = {
   title: "HappyProto: the backend for atproto apps",
   description:
-    "You build the app. HappyProto runs the backend: an API over 46 million atproto accounts, with sign-in, private data and scripting included.",
+    "Build on atproto without the hard parts. HappyProto runs the backend: an API over 46 million atproto accounts, with sign-in, private data and scripting included.",
   url: "https://happyproto.at/",
   image: {
     url: "https://happyproto.at/og.png",
     width: 1200,
     height: 630,
-    alt: "You build the app. HappyProto runs the backend. Under it, a sample HappyView instance at your-app.hpy.at: three lexicons, and a listDocuments query returning a publication’s documents.",
+    alt: "Build on atproto without the hard parts. Under it, a sample HappyView instance at your-app.hpy.at: three lexicons, and a listDocuments query returning a publication’s documents.",
   },
 };
 
@@ -155,18 +155,22 @@ export const header = {
 
 export const hero = {
   /**
-   * The page's one H1, at the display size (v8): who does what, in two
-   * sentences, each its own line from 40rem (two lines at 1440, broken
-   * after "app."; `sentences()`, `.mk-title-part`).
+   * The page's one H1, at the display size (owner, 2026-10-16: the
+   * tagline): one sentence, no middle punctuation (social posts write it
+   * "Build on atproto… without the hard parts."). Still a `.mk-title-part`
+   * via `sentences()`, balanced over two lines at 1440.
    */
-  title: "You build the app. HappyProto runs the backend.",
+  title: "Build on atproto without the hard parts.",
   /**
-   * The one line of value (v8): what you get. "46 million" is the owner's
-   * network-size claim (the low end of Bluesky's published figures);
-   * auth (sign-in), private data and scripting are the points 03, 02 and 04
-   * prove, and the API over the network is 01's (owner round 6, verbatim).
+   * The one line of value: who does what (the old H1's "HappyProto runs
+   * the backend", now that the H1 is the tagline), then what you get.
+   * "46 million" is the owner's network-size claim (the low end of
+   * Bluesky's published figures); auth (sign-in), private data and
+   * scripting are the points 03, 02 and 04 prove, and the API over the
+   * network is 01's. "atproto" is left to the H1 right above it, which
+   * keeps the page under its word budget.
    */
-  sub: "A ready-made API over 46 million atproto accounts. Auth, private data, and scripting included.",
+  sub: "HappyProto runs the backend: auth, private data, scripting, and an API over 46 million accounts.",
   /** The hero form's id, so the page can be linked to it. */
   anchor: "join",
   /** The hero form's accessible name (a form landmark). The hero form has no helper: its status line is empty at rest. */

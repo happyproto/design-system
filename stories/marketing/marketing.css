@@ -10,11 +10,10 @@
  *   bar, 4rem header, and the .99rem max-width queries just under each
  *   step), the 40ch/60ch/65ch measures, 3ch for a code line's number and
  *   10ch for the URL bar's starting width;
- * - the display H1 (v6; v8: two sentences, one line each from 40rem):
- *   on a phone clamp() from text-3xl through 12vw to text-4xl (so "You
- *   build the app." keeps one line down to 320); from 40rem from text-4xl
- *   through 6.4vw to one and a quarter text-5xl (4.6875rem; owner round
- *   4), so "HappyProto runs the backend." keeps one line from 768; at 1.05 leading and 1.5x the tight tracking
+ * - the display H1 (v6; the tagline since 2026-10-16, one sentence,
+ *   balanced): on a phone clamp() from text-3xl through 12vw to
+ *   text-4xl; from 40rem from text-4xl through 6.4vw to one and a
+ *   quarter text-5xl (4.6875rem; owner round 4), two lines at 1440; at 1.05 leading and 1.5x the tight tracking
  *   (-0.03em; the section headlines and the close take the same).
  *   DESIGN.md's Fixed Scale Rule keeps the *tokens* fixed rem steps; a
  *   viewport-wide hero headline is the one place the brief asks for fluid
@@ -807,9 +806,9 @@
     var(--mk-tick) 100% 100% / 1px var(--mk-arm) no-repeat;
 }
 
-/* The page's undisputed largest type (v8: two sentences, "You build the
-   app." over "HappyProto runs the backend."): each sentence its own line
-   (`.mk-title-part`), each line balanced if it must wrap. Fluid: on a
+/* The page's undisputed largest type (the tagline, "Build on atproto
+   without the hard parts."): each sentence its own line
+   (`.mk-title-part`; there is one), balanced as it wraps. Fluid: on a
    phone up to text-4xl, the first sentence on one line; from 40rem from
    text-4xl to one and a quarter text-5xl (owner round 4: was one and a
    half, a smidge smaller for air above the stage), so each sentence keeps
