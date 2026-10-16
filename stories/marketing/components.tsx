@@ -35,6 +35,7 @@ import {
   type SignupState,
   features,
   figure,
+  noteCount,
   stage,
 } from "./content";
 import logoOnLight from "./assets/logotype.dark.svg";
@@ -226,11 +227,8 @@ export function SignupForm({
       <div className="mk-signup-followup" data-note={note === "open" ? undefined : note}>
         <div className="mk-signup-note-fields">
           <label className="mk-signup-label" htmlFor={`signup-note-${id}`}>
-            {signup.note.label} <span className="mk-signup-optional">{signup.note.optional}</span>
+            {signup.note.label}
           </label>
-          <p className="mk-signup-hint" id={`signup-note-hint-${id}`}>
-            {signup.note.hint}
-          </p>
           <div className="mk-signup-row">
             <textarea
               className="mk-signup-input mk-signup-note"
@@ -238,13 +236,14 @@ export function SignupForm({
               name="note"
               rows={2}
               maxLength={signup.note.max}
-              aria-describedby={`signup-note-hint-${id} signup-status-${id} signup-note-status-${id}`}
+              aria-describedby={`signup-note-count-${id} signup-status-${id} signup-note-status-${id}`}
               defaultValue={note === "open" ? undefined : SAMPLE_NOTE}
             />
             <button className="mk-button-secondary mk-signup-send" type="button" data-signup-send="" disabled={note === "sending"}>
               {signup.note.button}
             </button>
           </div>
+          <NoteCount id={id} count={note === "open" ? 0 : SAMPLE_NOTE.length} />
         </div>
         <blockquote className="mk-signup-sent" id={`signup-note-sent-${id}`}>
           {note === "sent" ? SAMPLE_NOTE : ""}
@@ -255,11 +254,19 @@ export function SignupForm({
         <p className="mk-signup-next">
           <Linked text={signup.next.text} links={signup.next.links} />
         </p>
-        <button className="mk-text-button" type="button" data-signup-reset="">
-          {signup.reset}
-        </button>
       </div>
     </form>
+  );
+}
+
+/** The note's counter, under its field: the short form on screen, the long one for screen readers (the field is described by it). */
+function NoteCount({ id, count }: { id: string; count: number }) {
+  const { text, name } = noteCount(count);
+  return (
+    <p className="mk-signup-count" id={`signup-note-count-${id}`}>
+      <span aria-hidden="true">{text}</span>
+      <span className="mk-sr-only">{name}</span>
+    </p>
   );
 }
 

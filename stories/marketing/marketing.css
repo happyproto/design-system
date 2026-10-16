@@ -362,35 +362,6 @@
   block-size: 1em;
 }
 
-/* A link that is a button: resets a form. */
-.mk-text-button {
-  appearance: none;
-  justify-self: start;
-  min-block-size: 2.75rem; /* 44px touch target */
-  min-inline-size: 2.75rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--hp-radius-sm);
-  background: none;
-  color: var(--hp-color-fg);
-  font: inherit;
-  font-size: var(--hp-text-sm);
-  text-decoration-line: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: var(--hp-space-1);
-  cursor: pointer;
-  transition: color var(--hp-motion-duration-fast) var(--hp-motion-ease);
-}
-
-.mk-text-button:hover {
-  color: var(--hp-color-accent);
-}
-
-.mk-text-button:focus-visible {
-  outline: 2px solid var(--hp-color-accent);
-  outline-offset: 2px;
-}
-
 /* The secondary button: the page ground, an fg-muted edge (it has to reach
    3:1 on the page, which border-strong does not) and the ink label. The
    note's Send. A link or a button. */
@@ -880,7 +851,6 @@
    start edge, like the closing form's, until a join (round 4: the success
    block is centred, see "Signup form"). */
 .mk-hero-signup {
-  position: relative; /* the credit's box */
   display: grid;
   justify-self: center;
   gap: var(--hp-space-2);
@@ -891,21 +861,21 @@
 }
 
 /* Round 5: the credit, a small muted line right under the hero form,
-   centred: the email promise's short form ("One email when it opens.",
-   critique round 10; v8: alone, the maintainer credit and the release
-   count gone). It sits on the first of the status line's reserved lines,
-   which are empty at rest (2lh; 3lh on a phone, see the status line), so
-   it takes no room and nothing under it moves. It gives way (hidden, not
-   removed from the flow it never took) whenever the status line has
-   something to say or the form has left rest: submitting, a message, a
-   join. Without JavaScript the form is hidden and the credit is in the
-   flow (noscriptCss). */
+   centred: the email promise (owner round 6: in full, in the owner's
+   words). It starts on the first of the status line's reserved lines,
+   which are empty at rest (2lh; 3lh on a phone, see the status line):
+   pulled up over them by as much as they and the gap take. Owner round 6:
+   it is in the flow, so where the promise wraps past those lines the hero
+   grows by the difference, once, instead of the promise running into the
+   stage. It gives way (hidden, its room kept, so nothing under it moves)
+   whenever the status line has something to say or the form has left
+   rest: submitting, a message, a join. Without JavaScript the form is
+   hidden and the credit is not pulled up (noscriptCss). */
 .mk-hero-credit {
-  position: absolute;
-  inset-block-start: calc(100% - 2lh);
-  inset-inline: 0;
   margin: 0;
+  margin-block-start: calc(-2lh - var(--hp-space-2));
   font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-normal); /* the status line's, so its lines are the reserved lines */
   color: var(--hp-color-fg-muted);
   text-align: center;
   text-wrap: balance;
@@ -913,7 +883,7 @@
 
 @media (max-width: 29.99rem) {
   .mk-hero-credit {
-    inset-block-start: calc(100% - 3lh);
+    margin-block-start: calc(-3lh - var(--hp-space-2));
   }
 }
 
@@ -2577,11 +2547,10 @@
   }
 }
 
-/* The note's Send is short: beside its field at every width, at its own
-   height. */
+/* The note's Send: beside its field at every width, as tall as it (owner
+   round 6). */
 .mk-signup-note-fields .mk-signup-row {
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
 }
 
 .mk-signup-label {
@@ -2590,17 +2559,14 @@
   color: var(--hp-color-fg);
 }
 
-.mk-signup-optional {
-  font-weight: var(--hp-weight-regular);
-  color: var(--hp-color-fg-muted);
-}
-
-/* The note's hint, between its label and its field. */
-.mk-signup-hint {
+/* Owner round 6: the note's character counter, under its field at the end
+   edge, in tabular figures so it doesn't jitter as it counts. */
+.mk-signup-count {
   margin: 0;
   font-size: var(--hp-text-sm);
+  font-variant-numeric: tabular-nums;
   color: var(--hp-color-fg-muted);
-  text-wrap: pretty;
+  text-align: end;
 }
 
 .mk-signup-input {
@@ -2795,11 +2761,11 @@
 
 /* Round 4: one axis for the whole success block, in both forms (the hero
    and the close are both centred compositions): the heading, the status
-   line, the note's label (its hint beside it where both fit, else under
-   it), the note's field and Send, the thanks, the next step and "Sign up
-   another address", each on its own line on the form's centre line. The
-   note's field and Send keep the email row's full width, and typed text
-   (the field, the note quoted back) still reads from the start edge. */
+   line, the note's label, the note's field and Send, the thanks and the
+   next step, each on its own line on the form's centre line. The note's
+   field and Send keep the email row's full width, its counter sits under
+   them at the end edge, and typed text (the field, the note quoted back)
+   still reads from the start edge. */
 :is(.mk-hero-signup, .mk-cta-signup) .mk-signup[data-state="success"] {
   text-align: center;
 }
@@ -2816,12 +2782,12 @@
   gap: var(--hp-space-2);
 }
 
-:is(.mk-hero-signup, .mk-cta-signup) .mk-signup[data-state="success"] .mk-signup-followup:not([data-note="sent"]) .mk-signup-note-fields > .mk-signup-row {
+:is(.mk-hero-signup, .mk-cta-signup) .mk-signup[data-state="success"] .mk-signup-followup:not([data-note="sent"]) .mk-signup-note-fields > :is(.mk-signup-row, .mk-signup-count) {
   flex-basis: 100%;
 }
 
-:is(.mk-hero-signup, .mk-cta-signup) .mk-signup[data-state="success"] [data-signup-reset] {
-  justify-self: center;
+:is(.mk-hero-signup, .mk-cta-signup) .mk-signup[data-state="success"] .mk-signup-count {
+  text-align: end;
 }
 
 .mk-signup-joined:focus {
@@ -2840,10 +2806,11 @@
 }
 
 /* The follow-up: the note and its Send, the note's status line, then the
-   reset. Until the status line has something to say it takes no room (out
-   of flow, so the grid gives it no gap either): the reset sits right under
-   the note. Once it says "Sending…", the thanks or a failure, it keeps its
-   reserved lines, so the reset moves once, not with every message. Once
+   next step. Until the status line has something to say it takes no room
+   (out of flow, so the grid gives it no gap either): the next step sits
+   right under the note. Once it says "Sending…", the thanks or a failure,
+   it keeps its reserved lines, so the next step moves once, not with every
+   message. Once
    sent, the field and Send give way to the note itself, as static text in
    a muted quote block, then the thanks (which takes focus). */
 .mk-signup-followup {
@@ -3246,7 +3213,6 @@
   .mk-header-actions .mk-header-join,
   .mk-link,
   .mk-faq-link,
-  .mk-text-button,
   .mk-button-secondary,
   .mk-button-primary,
   .mk-signup-input,

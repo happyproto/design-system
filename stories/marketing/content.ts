@@ -160,10 +160,10 @@ export const hero = {
   /**
    * The one line of value (v8): what you get. "46 million" is the owner's
    * network-size claim (the low end of Bluesky's published figures);
-   * sign-in, private data and scripting are the points 03, 02 and 04
-   * prove, and the API over the network is 01's (owner round 3, verbatim).
+   * auth (sign-in), private data and scripting are the points 03, 02 and 04
+   * prove, and the API over the network is 01's (owner round 6, verbatim).
    */
-  sub: "A ready-made API over 46 million atproto accounts, with sign-in, private data and scripting included.",
+  sub: "A ready-made API over 46 million atproto accounts. Auth, private data, and scripting included.",
   /** The hero form's id, so the page can be linked to it. */
   anchor: "join",
   /** The hero form's accessible name (a form landmark). The hero form has no helper: its status line is empty at rest. */
@@ -175,9 +175,14 @@ export const hero = {
    * (marketing.css). Critique round 10: the email promise's short form (the
    * closing helper keeps the whole sentence, so the two never repeat word
    * for word). v8: the promise alone; the maintainer credit and the
-   * release count went (the owner: they don't matter).
+   * release count went (the owner: they don't matter). Owner round 6: the
+   * whole promise, in the owner's words, with what the address is never
+   * used for.
    */
-  credit: { promise: "One email when it opens." },
+  credit: {
+    promise:
+      "We’ll only email to let you know that HappyProto is open, or that you were chosen for the closed beta. Your email is never shared or used outside of that.",
+  },
 };
 
 /**
@@ -816,19 +821,22 @@ export const signup = {
    * with the same address. `join_waitlist()` attaches it to the existing row.
    */
   note: {
-    label: "What are you building?",
-    optional: "(optional, 280 characters)",
-    /** Under the label: why it's worth writing. The note is described by it. */
-    hint: "Every note is read.",
-    /** join_waitlist() clamps to the same length. */
-    max: 280,
+    label: "Tell us about what you’re building",
+    /**
+     * Owner round 6: the limit is a counter under the field, right-aligned
+     * ("{count}/{max}" on screen, the long form for screen readers), in
+     * place of the label's "(optional, 280 characters)". join_waitlist()
+     * clamps to the same length.
+     */
+    max: 500,
+    count: "{count}/{max}",
+    countName: "{count} of {max} characters",
     button: "Send",
     sending: "Sending…",
     sent: "Got it, thanks.",
     unavailable: "Your note didn’t save. Try again in a minute.",
   },
   button: "Join the beta",
-  reset: "Sign up another address",
   trapLabel: "Leave this empty",
   /** Shown under each form when JavaScript is off. */
   noscript:
@@ -837,8 +845,8 @@ export const signup = {
   /**
    * After a join: a heading, which takes focus (the status line, a live
    * region, says the rest). Together they read "You’re on the waitlist.
-   * One email goes to {email} when it opens, or a beta invite sooner."
-   * (critique round 9: the page's one wording of the email promise).
+   * We’ll send an email to {email} when HappyProto opens, or sooner if
+   * you’re selected for the closed beta." (owner round 6, verbatim).
    */
   joined: "You’re on the waitlist.",
   /**
@@ -847,7 +855,7 @@ export const signup = {
    * skipped, and right under "Got it, thanks." once it is sent).
    */
   next: {
-    text: "While you wait: try the {tutorial}.",
+    text: "While you wait, try the {tutorial}.",
     links: { tutorial: TUTORIAL },
   },
   /**
@@ -855,15 +863,15 @@ export const signup = {
    * none: its status line is empty at rest. It is the email promise (the
    * FAQ's "What happens to my email?"). Critique round 6: the $10 target,
    * added here in round 5, moved up into the close's own line (`cta.line`).
-   * Critique round 10: the whole promise is said here; the hero credit says
-   * its short form ("One email when it opens."), so the two forms never
-   * repeat each other word for word.
+   * Owner round 6: the hero credit now says the promise in full, in the
+   * owner's words; this short form stays, so the two forms never repeat
+   * each other word for word.
    */
   status: {
     idle: "One email when it opens, or a beta invite sooner.",
     submitting: "Adding you to the waitlist…",
     success:
-      "One email goes to {email} when it opens, or a beta invite sooner.",
+      "We’ll send an email to {email} when HappyProto opens, or sooner if you’re selected for the closed beta.",
     invalid: "Check the address for typos.",
     rejected:
       "That address couldn’t be accepted. Check it for typos, or message {bluesky} on Bluesky.",
@@ -874,6 +882,12 @@ export const signup = {
     domain: "Check the part after the @, like example.com.",
   } satisfies Record<SignupMessage, string>,
 };
+
+/** The note's counter for `count` characters typed: what it shows, and what a screen reader hears (owner round 6). */
+export function noteCount(count: number): { text: string; name: string } {
+  const fill = (t: string) => t.replace("{count}", String(count)).replace("{max}", String(signup.note.max));
+  return { text: fill(signup.note.count), name: fill(signup.note.countName) };
+}
 
 /** One piece of a template: plain text, or the name of a `{slot}`. */
 export type Part = string | { slot: string };
@@ -1030,4 +1044,4 @@ export const footer = {
  * `html.js-motion`, which only the head script sets. !important because the bundled stylesheet comes after it.
  */
 export const noscriptCss =
-  ".mk-signup, .mk-header-join { display: none !important; } .mk-hero-credit { position: static !important; }";
+  ".mk-signup, .mk-header-join { display: none !important; } .mk-hero-credit { margin-block-start: 0 !important; }";
