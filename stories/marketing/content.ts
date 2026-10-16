@@ -98,6 +98,11 @@ const BLUESKY = {
   label: "@happyproto.at",
   href: "https://bsky.app/profile/happyproto.at",
 };
+/** Owner round 7: the community, linked wherever the page says where to ask or what to do next. */
+const DISCORD = {
+  label: "HappyProto Discord",
+  href: "https://discord.gg/Cbt6EVthyQ",
+};
 /** Owner round 3: the contact address, in the FAQ's email answer only. */
 const SUPPORT = {
   label: "support@happyproto.at",
@@ -855,8 +860,8 @@ export const signup = {
    * skipped, and right under "Got it, thanks." once it is sent).
    */
   next: {
-    text: "While you wait, try the {tutorial}.",
-    links: { tutorial: TUTORIAL },
+    text: "While you wait, try the {tutorial} or join the {discord}.",
+    links: { tutorial: TUTORIAL, discord: DISCORD },
   },
   /**
    * `idle` is the closing form's helper, under the button. The hero form has
@@ -952,8 +957,8 @@ export const faq = {
    * name.
    */
   help: {
-    text: "Something else? Ask {bluesky} on Bluesky.",
-    links: { bluesky: BLUESKY },
+    text: "Something else? Ask in the {discord} or {bluesky} on Bluesky.",
+    links: { discord: DISCORD, bluesky: BLUESKY },
   },
   permalink: { text: "#", label: "Link to this question: {q}" },
   items: [
@@ -1031,6 +1036,8 @@ export const footer = {
     { label: "HappyView on GitHub", href: REPO },
     { label: "HappyView docs", href: DOCS },
     { label: "@happyproto.at on Bluesky", href: BLUESKY.href },
+    /** "Discord" alone: with "HappyProto" the four links no longer fit one row beside the rail (701px in 664px). */
+    { label: "Discord", href: DISCORD.href },
   ] as Link[],
 };
 
