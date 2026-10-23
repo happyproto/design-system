@@ -134,7 +134,13 @@
   }
 }
 
-/* Explicit override, in either direction. */
+/* Explicit override, in either direction. Light needs only the scheme: its
+   values are :root's, but :root asks for "light dark", which a dark OS
+   would answer with dark form controls and scrollbars. */
+[data-theme="light"] {
+  color-scheme: light;
+}
+
 [data-theme="dark"] {
   color-scheme: dark;
 
