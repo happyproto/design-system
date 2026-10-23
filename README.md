@@ -1,11 +1,15 @@
 # @happyview/design-system
 
-Design tokens for HappyProto, gated on WCAG AAA and colour-vision separation.
+Design tokens and shared components for HappyProto, gated on WCAG AAA and
+colour-vision separation.
 
 **[Browse the Storybook →](https://happyproto.github.io/design-system/)**
 
-Tokens only: colours, type, spacing, radii, shadows, motion and a semantic
-z-index scale. No components. The stories exist to prove the language works on
+Tokens — colours, type, spacing, radii, shadows, motion and a semantic z-index
+scale — and one stylesheet of the components happyproto.at and the dashboard
+both draw: buttons, links, tags, fields, the mono label, the logotype, the
+technical-drawing frame and the honeycomb backdrop. Plain CSS, no framework.
+The stories exist to prove the language works on
 real surfaces — a twelve-column matrix at AAA contrast in dark mode is where a
 design language either holds or doesn't.
 
@@ -48,6 +52,37 @@ tokens.color.accent; // "oklch(0.432 0.076 223.1)"
 `tokens` carries the **light** theme. `tokens.css` is the source of truth for
 theming, and a test asserts every value in the JS mirror matches the `:root`
 block, so the two cannot drift.
+
+### Components
+
+`components.css` goes after the tokens:
+
+```ts
+import "@happyview/design-system/tokens.css";
+import "@happyview/design-system/components.css";
+```
+
+| Class | What it is |
+| --- | --- |
+| `hp-button` | Secondary button; add `hp-button-primary` (the one filled button on a screen), `hp-button-danger`, `hp-button-quiet` or `hp-button-small` |
+| `hp-link` | A link in the accent, underlined |
+| `hp-tag` | A chip in the mono; `data-tone` is `brand`, `alt`, `accent`, `success`, `danger` or `soon` |
+| `hp-label` | A small mono label in the muted ink |
+| `hp-field` | An input, or a box holding one with `hp-field-affix` parts beside it |
+| `hp-logotype` | The logotype; pair `hp-logotype-on-light` and `hp-logotype-on-dark` and it follows the theme |
+| `hp-frame` / `hp-rule` | A column with rails, and a hairline across it with a `+` at each rail; `hp-rule-bleed` runs it past the rails |
+| `hp-honeycomb` | The honeycomb backdrop behind a block |
+
+The logotype files are exported too, so a bundler can resolve them:
+
+```ts
+import onLight from "@happyview/design-system/logotype.dark.svg";
+import onDark from "@happyview/design-system/logotype.light.svg";
+```
+
+Class names are public API on the same terms as token names (below). A test
+fails the build if `components.css` writes a literal colour or names a token
+that does not exist.
 
 ## Theming
 

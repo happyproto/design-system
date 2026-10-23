@@ -1,7 +1,7 @@
 {
   "name": "@happyview/design-system",
   "version": "1.0.0",
-  "description": "Design tokens for HappyProto, gated on WCAG AAA and colour-vision separation.",
+  "description": "Design tokens and shared components for HappyProto, gated on WCAG AAA and colour-vision separation.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,11 +13,16 @@
       "default": "./dist/index.js"
     },
     "./tokens.css": "./src/tokens.css",
+    "./components.css": "./src/components.css",
+    "./logotype.light.svg": "./src/assets/logotype.light.svg",
+    "./logotype.dark.svg": "./src/assets/logotype.dark.svg",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "src/tokens.css"
+    "src/tokens.css",
+    "src/components.css",
+    "src/assets"
   ],
   "publishConfig": {
     "access": "public"
