@@ -2,7 +2,8 @@
  *
  * The pieces happyproto.at and the dashboard both draw: buttons, links,
  * tags, fields, the mono label, the logotype, the technical-drawing frame
- * (rails, rules and their "+" marks) and the honeycomb backdrop. Plain CSS,
+ * (rails, rules and their "+" marks), the honeycomb backdrop, and the
+ * product's own vocabulary: the window, its states and its figures. Plain CSS,
  * no markup contract beyond the class names, which are public API on the
  * same terms as the tokens: renaming one is a major version.
  *
@@ -15,7 +16,11 @@
  * var(--hp-*) names a token that does not exist. Literal exceptions, each
  * the same as on happyproto.at:
  * - 1px hairlines, 2px focus rings and their 2px offset;
- * - 2.75rem (44px) minimum targets, WCAG 2.5.5 (AAA) in both directions;
+ * - 2.75rem (44px) minimum targets, WCAG 2.5.5 (AAA) in both directions,
+ *   and a window bar's minimum height, so a bar holding a button and one
+ *   holding only its title are the same height;
+ * - the dark window's mixes (35%, 85%, 75%): the site's, and the same
+ *   steps for the danger ink, see .hp-window;
  * - the "+" mark: a space-3 square less 1px (11px, odd so its 1px arms
  *   centre on a 1px rail);
  * - 80% in the primary button's hover: the accent mixed toward the ink,
@@ -457,6 +462,231 @@ input.hp-field:disabled {
   .hp-honeycomb::before {
     display: none;
   }
+}
+
+/* ---- Windows ----------------------------------------------------------------
+
+   happyproto.at's product window, as a working panel: a hairline at
+   radius-lg on the surface, a bar along its top (a mono title, a status or
+   a count at its end), then the body. The product's one container: a
+   window never sits inside another.
+
+     <section class="hp-window">
+       <header class="hp-window-bar">
+         <h2 class="hp-window-title">Usage</h2>
+         <span class="hp-window-meta">5 of 8</span>
+       </header>
+       <div class="hp-window-body">…</div>
+     </section>
+
+   In the dark scheme a window is lifted the way the site lifts its windows:
+   the raised step goes half way to the border token (L 0.24), the bar one
+   step more (L 0.28), and the ring takes 35% of the accent. On those grounds
+   the muted ink takes 15% (body) or 25% (bar) of the ink so it holds 7:1,
+   the success ink 15%, and the danger ink 15% (7.4:1) or 25% on the bar
+   (7.2:1); mixes of published tokens, no new token.
+   `data-tone="danger"` rings it in the danger ink, for an irreversible
+   action's panel. */
+.hp-window {
+  --hp-window-bar: var(--hp-color-surface-raised);
+  min-inline-size: 0;
+  border: 1px solid var(--hp-color-border);
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  box-shadow: var(--hp-shadow-ambient);
+  color: var(--hp-color-fg);
+}
+
+.hp-window[data-tone="danger"] {
+  border-color: var(--hp-color-danger);
+}
+
+.hp-window-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hp-space-2) var(--hp-space-3);
+  min-block-size: 2.75rem;
+  padding: var(--hp-space-2) var(--hp-space-4);
+  border-block-end: 1px solid var(--hp-color-border);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  background: var(--hp-window-bar);
+}
+
+.hp-window-title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
+  color: var(--hp-color-fg);
+}
+
+.hp-window-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hp-space-2) var(--hp-space-4);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-variant-numeric: var(--hp-font-numeric);
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-window-body {
+  padding: var(--hp-space-4);
+}
+
+/* The lifted values are worked out once, on the root, from the theme's own
+   tokens; a window then points its tokens at them. (A token defined in terms
+   of itself on the same element is a cycle, and the browser drops it.) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hp-window-raised: color-mix(in oklch, var(--hp-color-surface-raised), var(--hp-color-border)); /* see header */
+    --hp-window-muted: color-mix(in oklch, var(--hp-color-fg-muted) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-success: color-mix(in oklch, var(--hp-color-success) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-danger: color-mix(in oklch, var(--hp-color-danger) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-bar-danger: color-mix(in oklch, var(--hp-color-danger) 75%, var(--hp-color-fg)); /* see header */
+    --hp-window-bar-muted: color-mix(in oklch, var(--hp-color-fg-muted) 75%, var(--hp-color-fg)); /* see header */
+    --hp-window-ring: color-mix(in oklab, var(--hp-color-accent) 35%, var(--hp-color-border-strong)); /* see header */
+  }
+  :root:not([data-theme="light"]) .hp-window {
+    --hp-color-surface-raised: var(--hp-window-raised);
+    --hp-color-fg-muted: var(--hp-window-muted);
+    --hp-color-success: var(--hp-window-success);
+  --hp-color-danger: var(--hp-window-danger);
+    --hp-color-danger: var(--hp-window-danger);
+    --hp-window-bar: var(--hp-color-border);
+    border-color: var(--hp-window-ring);
+    background: var(--hp-window-raised);
+    box-shadow: var(--hp-shadow-ambient), var(--hp-shadow-overlay);
+  }
+  :root:not([data-theme="light"]) .hp-window-bar {
+    --hp-color-fg-muted: var(--hp-window-bar-muted);
+  --hp-color-danger: var(--hp-window-bar-danger);
+    --hp-color-danger: var(--hp-window-bar-danger);
+    --hp-color-border: var(--hp-color-border-strong);
+  }
+  :root:not([data-theme="light"]) .hp-window[data-tone="danger"] {
+    border-color: var(--hp-color-danger);
+  }
+}
+
+:root[data-theme="dark"] {
+  --hp-window-raised: color-mix(in oklch, var(--hp-color-surface-raised), var(--hp-color-border));
+  --hp-window-muted: color-mix(in oklch, var(--hp-color-fg-muted) 85%, var(--hp-color-fg));
+  --hp-window-success: color-mix(in oklch, var(--hp-color-success) 85%, var(--hp-color-fg));
+  --hp-window-danger: color-mix(in oklch, var(--hp-color-danger) 85%, var(--hp-color-fg));
+  --hp-window-bar-danger: color-mix(in oklch, var(--hp-color-danger) 75%, var(--hp-color-fg));
+  --hp-window-bar-muted: color-mix(in oklch, var(--hp-color-fg-muted) 75%, var(--hp-color-fg));
+  --hp-window-ring: color-mix(in oklab, var(--hp-color-accent) 35%, var(--hp-color-border-strong));
+}
+
+:root[data-theme="dark"] .hp-window {
+  --hp-color-surface-raised: var(--hp-window-raised);
+  --hp-color-fg-muted: var(--hp-window-muted);
+  --hp-color-success: var(--hp-window-success);
+  --hp-color-danger: var(--hp-window-danger);
+  --hp-window-bar: var(--hp-color-border);
+  border-color: var(--hp-window-ring);
+  background: var(--hp-window-raised);
+  box-shadow: var(--hp-shadow-ambient), var(--hp-shadow-overlay);
+}
+
+:root[data-theme="dark"] .hp-window-bar {
+  --hp-color-fg-muted: var(--hp-window-bar-muted);
+  --hp-color-danger: var(--hp-window-bar-danger);
+  --hp-color-border: var(--hp-color-border-strong);
+}
+
+:root[data-theme="dark"] .hp-window[data-tone="danger"] {
+  border-color: var(--hp-color-danger);
+}
+
+/* ---- States -----------------------------------------------------------------
+
+   One state language, the site's: a status in the mono at its medium
+   weight, after a 1em mark that carries its shape. The word carries the
+   meaning; the mark's shape (a dot, a ring, a half ring, a tick, a cross, a
+   bar) carries it again without colour. `data-state`:
+   - live       a solid success dot (running, connected, responding);
+   - done       the tick in the success ink;
+   - running    the half ring in the accent (in progress);
+   - pending    the ring in the muted ink (not yet);
+   - failed     the cross in the danger ink;
+   - idle       the bar in the muted ink (stopped). */
+.hp-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-2);
+  min-inline-size: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
+  color: var(--hp-color-fg);
+  white-space: nowrap;
+}
+
+.hp-state > svg {
+  flex: none;
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+.hp-state[data-state="live"] > svg,
+.hp-state[data-state="done"] > svg {
+  color: var(--hp-color-success);
+}
+
+.hp-state[data-state="running"] > svg {
+  color: var(--hp-color-accent);
+}
+
+.hp-state[data-state="pending"] > svg,
+.hp-state[data-state="idle"] > svg {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-state[data-state="idle"] {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-state[data-state="failed"] {
+  color: var(--hp-color-danger);
+}
+
+/* ---- Figures ----------------------------------------------------------------
+
+   A measurement: the mono at its medium weight, tabular, in the ink, so a
+   column of them aligns and a figure that updates never jitters. A label
+   (.hp-label) above it, a unit or a denominator after it in the muted ink
+   (.hp-figure-unit). Title size by default; `data-size="lg"` for the one
+   figure a panel is about. */
+.hp-figure {
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-xl);
+  font-weight: var(--hp-weight-medium);
+  font-variant-numeric: var(--hp-font-numeric);
+  letter-spacing: var(--hp-tracking-tight);
+  line-height: var(--hp-leading-tight);
+  color: var(--hp-color-fg);
+}
+
+.hp-figure[data-size="lg"] {
+  font-size: var(--hp-text-3xl);
+}
+
+.hp-figure-unit {
+  margin-inline-start: var(--hp-space-1);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-regular);
+  letter-spacing: var(--hp-tracking-normal);
+  color: var(--hp-color-fg-muted);
 }
 
 /* ---- Motion and forced colours -------------------------------------------- */

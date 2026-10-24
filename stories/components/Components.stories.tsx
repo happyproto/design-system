@@ -95,3 +95,68 @@ export const Frame: StoryObj = {
     </div>
   ),
 };
+
+const marks = {
+  live: <circle cx="8" cy="8" r="3.5" fill="currentColor" />,
+  done: <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />,
+  running: (
+    <>
+      <circle cx="8" cy="8" r="5.25" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 4.75a3.25 3.25 0 0 1 0 6.5z" fill="currentColor" />
+    </>
+  ),
+  pending: <circle cx="8" cy="8" r="5.25" stroke="currentColor" strokeWidth="1.5" />,
+  failed: <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />,
+  idle: <path d="M4 8h8" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />,
+};
+
+const State = ({ state, children }: { state: keyof typeof marks; children: string }) => (
+  <span className="hp-state" data-state={state}>
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">{marks[state]}</svg>
+    {children}
+  </span>
+);
+
+export const States: StoryObj = {
+  render: () => (
+    <div style={{ ...stack, ...row }}>
+      <State state="live">running</State>
+      <State state="done">completed</State>
+      <State state="running">migrating</State>
+      <State state="pending">queued</State>
+      <State state="failed">failed</State>
+      <State state="idle">stopped</State>
+    </div>
+  ),
+};
+
+export const Window: StoryObj = {
+  render: () => (
+    <div style={{ ...stack, maxInlineSize: "36rem" }}>
+      <section className="hp-window">
+        <header className="hp-window-bar">
+          <h2 className="hp-window-title">Health</h2>
+          <span className="hp-window-meta"><State state="live">responding</State></span>
+        </header>
+        <div className="hp-window-body" style={{ display: "flex", gap: "var(--hp-space-8)" }}>
+          <div>
+            <p className="hp-label">Response time</p>
+            <p className="hp-figure" data-size="lg">84<span className="hp-figure-unit">ms</span></p>
+          </div>
+          <div>
+            <p className="hp-label">Records</p>
+            <p className="hp-figure">48,213,906</p>
+          </div>
+        </div>
+      </section>
+      <section className="hp-window" data-tone="danger">
+        <header className="hp-window-bar">
+          <h2 className="hp-window-title">Danger zone</h2>
+        </header>
+        <div className="hp-window-body">
+          <button className="hp-button hp-button-danger" type="button">Delete project</button>
+        </div>
+      </section>
+    </div>
+  ),
+};

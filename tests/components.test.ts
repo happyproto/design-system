@@ -35,9 +35,27 @@ describe("components.css", () => {
     expect(unknown).toEqual([]);
   });
 
-  test("never redefines a token", () => {
-    const shadowed = [...local].filter((name) => declared.has(name));
-    expect(shadowed).toEqual([]);
+  /**
+   * A token is never redefined for the page. Inside a window it may be
+   * re-pointed at a mix of other tokens: the dark window lifts its ground,
+   * and the inks on it move with it so they keep 7:1 (see .hp-window). The
+   * selector has to be a window's and the value has to be built from tokens.
+   */
+  test("re-points a token only inside a window, and only to tokens", () => {
+    const misplaced: string[] = [];
+    for (const rule of components.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const selector = rule[1]!.trim();
+      for (const decl of rule[2]!.matchAll(/(--hp-[A-Za-z0-9_-]+)\s*:\s*([^;]+);/g)) {
+        if (!declared.has(decl[1]!)) continue;
+        const inWindow = /\.hp-window\b/.test(selector);
+        const fromTokens = /^(?:var\(--hp-[a-z0-9-]+\)|color-mix\(in okl(?:ch|ab), var\(--hp-[a-z0-9-]+\)(?: \d+%)?, var\(--hp-[a-z0-9-]+\)\))$/.test(decl[2]!.trim());
+        // A token that names itself is a cycle: the browser drops it, and
+        // everything that reads it falls back to the inherited value.
+        const cycle = decl[2]!.includes(`var(${decl[1]})`);
+        if (!inWindow || !fromTokens || cycle) misplaced.push(`${selector} { ${decl[1]}: ${decl[2]!.trim()} }`);
+      }
+    }
+    expect(misplaced).toEqual([]);
   });
 
   test("writes no literal colour", () => {

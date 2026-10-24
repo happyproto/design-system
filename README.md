@@ -72,6 +72,9 @@ import "@happyview/design-system/components.css";
 | `hp-logotype` | The logotype; pair `hp-logotype-on-light` and `hp-logotype-on-dark` and it follows the theme |
 | `hp-frame` / `hp-rule` | A column with rails, and a hairline across it with a `+` at each rail; `hp-rule-bleed` runs it past the rails |
 | `hp-honeycomb` | The honeycomb backdrop behind a block |
+| `hp-window` | The product's panel: `hp-window-bar` holding an `hp-window-title` and `hp-window-meta`, then `hp-window-body`; `data-tone="danger"` rings it in the danger ink. Lifted in dark, as on the site |
+| `hp-state` | A status in the mono after a 1em mark; `data-state` is `live`, `done`, `running`, `pending`, `failed` or `idle` |
+| `hp-figure` | A measurement in the mono, tabular; `data-size="lg"` for the one a panel is about, `hp-figure-unit` for its unit |
 
 The logotype files are exported too, so a bundler can resolve them:
 
