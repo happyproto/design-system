@@ -1,0 +1,710 @@
+/* HappyProto shared components.
+ *
+ * The pieces happyproto.at and the dashboard both draw: buttons, links,
+ * tags, fields, the mono label, the logotype, the technical-drawing frame
+ * (rails, rules and their "+" marks), the honeycomb backdrop, and the
+ * product's own vocabulary: the window, its states and its figures. Plain CSS,
+ * no markup contract beyond the class names, which are public API on the
+ * same terms as the tokens: renaming one is a major version.
+ *
+ * Import it after tokens.css:
+ *   import "@happyview/design-system/tokens.css";
+ *   import "@happyview/design-system/components.css";
+ *
+ * Every colour, size, weight, radius and duration is a token, and
+ * tests/components.test.ts fails the build if a literal colour appears or a
+ * var(--hp-*) names a token that does not exist. Literal exceptions, each
+ * the same as on happyproto.at:
+ * - 1px hairlines, 2px focus rings and their 2px offset;
+ * - 2.75rem (44px) minimum targets, WCAG 2.5.5 (AAA) in both directions,
+ *   and a window bar's minimum height, so a bar holding a button and one
+ *   holding only its title are the same height;
+ * - the dark window's mixes (35%, 85%, 75%): the site's, and the same
+ *   steps for the danger ink, see .hp-window;
+ * - the "+" mark: a space-3 square less 1px (11px, odd so its 1px arms
+ *   centre on a 1px rail);
+ * - 80% in the primary button's hover: the accent mixed toward the ink,
+ *   one step darker in light and lighter in dark, same hue, further from
+ *   its label in both;
+ * - the honeycomb: an SVG hexagon tile 5rem across (2.5 × space-8; a
+ *   pointy-top honeycomb repeats every √3 × its width), cut by a radial
+ *   fade whose stops are mask alpha, not colour. Its lines are the
+ *   hairline token, warmed 30% toward the accent at the heart;
+ * - 100vw as the outset of a bleeding rule, clipped by its scroller
+ *   (see .hp-rule-bleed);
+ * - system colours under forced colours, where every token is replaced.
+ */
+
+/* ---- Buttons ----------------------------------------------------------------
+
+   Outlined, small radius, one filled button per screen (DESIGN.md). Works on
+   <button> and <a>. */
+.hp-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hp-space-2);
+  min-block-size: 2.75rem; /* 44px target, see header */
+  min-inline-size: 2.75rem;
+  padding: var(--hp-space-2) var(--hp-space-4);
+  border: 1px solid var(--hp-color-fg-muted);
+  border-radius: var(--hp-radius-md);
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+  font: inherit;
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--hp-motion-duration-fast) var(--hp-motion-ease),
+    border-color var(--hp-motion-duration-fast) var(--hp-motion-ease),
+    color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.hp-button:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+/* Secondary (the default): the page ground with an fg-muted edge, which
+   reaches 3:1 where border-strong does not. Hover fills with the blue
+   surface; the edge stays accent so it holds in dark mode. */
+.hp-button:hover:not(:disabled, [aria-disabled="true"]) {
+  background: var(--hp-color-accent-surface);
+  border-color: var(--hp-color-accent);
+  color: var(--hp-color-accent-surface-fg);
+}
+
+.hp-button-primary {
+  border-color: var(--hp-color-accent);
+  background: var(--hp-color-accent);
+  color: var(--hp-color-accent-fg);
+}
+
+.hp-button-primary:hover:not(:disabled, [aria-disabled="true"]) {
+  --hp-button-hover: color-mix(in oklab, var(--hp-color-accent) 80%, var(--hp-color-fg)); /* see header */
+  background: var(--hp-button-hover);
+  border-color: var(--hp-button-hover);
+  color: var(--hp-color-accent-fg);
+}
+
+/* Destructive is an outline in the danger colour, never a red fill: the
+   fill belongs to the one primary action. */
+.hp-button-danger {
+  border-color: var(--hp-color-danger);
+  color: var(--hp-color-danger);
+}
+
+.hp-button-danger:hover:not(:disabled, [aria-disabled="true"]) {
+  background: var(--hp-color-danger);
+  border-color: var(--hp-color-danger);
+  color: var(--hp-color-bg);
+}
+
+/* A quieter button for dense rows: no edge until hovered. */
+.hp-button-quiet {
+  border-color: transparent;
+  background: transparent;
+}
+
+.hp-button-quiet:hover:not(:disabled, [aria-disabled="true"]) {
+  background: var(--hp-color-surface-raised);
+  border-color: var(--hp-color-border-strong);
+  color: var(--hp-color-fg);
+}
+
+/* Smaller, for table rows and toolbars. Still 44px wide at least where it
+   stands alone; the block size steps down to the dense row's. */
+.hp-button-small {
+  min-block-size: calc(2 * var(--hp-space-4));
+  padding: var(--hp-space-1) var(--hp-space-3);
+}
+
+/* No opacity tricks: they break the contrast guarantees silently. */
+.hp-button:disabled,
+.hp-button[aria-disabled="true"] {
+  cursor: default;
+  background: var(--hp-color-surface-raised);
+  border-color: var(--hp-color-border);
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- Links ----------------------------------------------------------------- */
+
+.hp-link {
+  color: var(--hp-color-accent);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: var(--hp-space-1);
+  border-radius: var(--hp-radius-sm);
+  transition: color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.hp-link:hover {
+  color: var(--hp-color-fg);
+}
+
+.hp-link:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+/* ---- Tags -----------------------------------------------------------------
+
+   DESIGN.md's chip: 3px radius, mono, a brand surface with its own ink or a
+   hairline. `data-tone`:
+   - (none)     a hairline in border-strong, the ink;
+   - brand      the blue surface (a record, the current choice);
+   - alt        the orange surface (a second kind of data, never attention
+                in chrome);
+   - accent     outlined in the accent (running, in progress);
+   - success    outlined in the success ink (done);
+   - danger     outlined in the danger ink (failed);
+   - soon       a dashed hairline in the muted ink (not yet). */
+.hp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-1);
+  min-inline-size: 0;
+  padding-inline: var(--hp-space-2);
+  border: 1px solid var(--hp-color-border-strong);
+  border-radius: var(--hp-radius-sm);
+  color: var(--hp-color-fg);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-xs);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-normal);
+  white-space: nowrap;
+}
+
+.hp-tag[data-tone="brand"] {
+  border-color: var(--hp-color-accent-surface);
+  background: var(--hp-color-accent-surface);
+  color: var(--hp-color-accent-surface-fg);
+}
+
+.hp-tag[data-tone="alt"] {
+  border-color: var(--hp-color-accent-alt-surface);
+  background: var(--hp-color-accent-alt-surface);
+  color: var(--hp-color-accent-alt-surface-fg);
+}
+
+.hp-tag[data-tone="accent"] {
+  border-color: var(--hp-color-accent);
+  color: var(--hp-color-accent);
+}
+
+.hp-tag[data-tone="success"] {
+  border-color: var(--hp-color-success);
+  color: var(--hp-color-success);
+}
+
+.hp-tag[data-tone="danger"] {
+  border-color: var(--hp-color-danger);
+  color: var(--hp-color-danger);
+}
+
+.hp-tag[data-tone="soon"] {
+  border-style: dashed;
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- The mono label -------------------------------------------------------
+
+   A small label in the mono and the muted ink, sentence case, untracked: a
+   panel's name and its count, an identifier's kind. A label, not a claim,
+   so it never stands above a heading as a kicker. */
+.hp-label {
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-regular);
+  line-height: var(--hp-leading-snug);
+  font-variant-numeric: var(--hp-font-numeric);
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- Fields ---------------------------------------------------------------
+
+   One outlined object: put the <input> inside .hp-field with any fixed
+   parts (a prefix, a domain) beside it, so the value reads as the variable
+   part. An <input class="hp-field"> on its own works too. */
+.hp-field {
+  display: flex;
+  align-items: stretch;
+  min-inline-size: 0;
+  min-block-size: 2.75rem; /* 44px target, see header */
+  border: 1px solid var(--hp-color-border-strong);
+  border-radius: var(--hp-radius-md);
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+  font: inherit;
+  font-size: var(--hp-text-base);
+  transition: border-color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+input.hp-field,
+.hp-field > input {
+  padding: var(--hp-space-2) var(--hp-space-3);
+}
+
+.hp-field > input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.hp-field > input:not(:first-child) {
+  padding-inline-start: var(--hp-space-1);
+}
+
+.hp-field > input:not(:last-child) {
+  padding-inline-end: var(--hp-space-1);
+}
+
+/* Placeholder held to the body's 7:1, not the usual light grey. */
+.hp-field::placeholder,
+.hp-field > input::placeholder {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-field-affix {
+  display: grid;
+  place-items: center;
+  padding-inline: var(--hp-space-3);
+  color: var(--hp-color-fg-muted);
+  font-size: var(--hp-text-sm);
+  user-select: none;
+}
+
+.hp-field-affix:first-child {
+  padding-inline-end: 0;
+}
+
+.hp-field-affix:last-child {
+  padding-inline-start: 0;
+}
+
+input.hp-field:focus-visible,
+.hp-field:has(> input:focus-visible) {
+  border-color: var(--hp-color-accent);
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+/* The message beside an invalid field is text, never the colour alone. */
+.hp-field[aria-invalid="true"],
+.hp-field[data-invalid="true"],
+.hp-field:has(> input[aria-invalid="true"]) {
+  border-color: var(--hp-color-danger);
+}
+
+.hp-field:has(> input:disabled),
+input.hp-field:disabled {
+  background: var(--hp-color-surface-raised);
+  border-color: var(--hp-color-border);
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- Logotype -------------------------------------------------------------
+
+   Two images, one shown: logotype.dark.svg (dark ink) on a light ground,
+   logotype.light.svg on a dark one. They follow the theme the same way the
+   tokens do: the system by default, data-theme when it is set.
+     <img class="hp-logotype hp-logotype-on-light" src=".../logotype.dark.svg" alt="HappyProto">
+     <img class="hp-logotype hp-logotype-on-dark" src=".../logotype.light.svg" alt="">
+   Size it by block-size; the width follows. */
+.hp-logotype {
+  display: block;
+  block-size: var(--hp-space-8);
+  inline-size: auto;
+}
+
+.hp-logotype-on-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hp-logotype-on-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .hp-logotype-on-dark {
+    display: block;
+  }
+}
+
+:root[data-theme="dark"] .hp-logotype-on-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .hp-logotype-on-dark {
+  display: block;
+}
+
+/* ---- The frame --------------------------------------------------------------
+
+   The page as a technical drawing. .hp-frame is a column with a 1px rail in
+   the hairline token down each side. .hp-rule inside a frame is a hairline
+   across its top that meets both rails, with a "+" in border-strong at each
+   crossing, so its box must span the frame's full inner width (no margin,
+   and no padded ancestor between it and the frame); data-edge="end" puts both on its bottom
+   instead. Add .hp-rule-bleed to run the hairline past the rails to the
+   edges of the nearest clipping box (give that box overflow-x: clip, which
+   leaves sticky positioning alone).
+
+   Rails, rules and marks are borders and pseudo-elements: nothing for
+   assistive technology, nothing to click. Print drops the marks. */
+.hp-frame {
+  --hp-frame-cross: calc(var(--hp-space-3) - 1px); /* 11px, see header */
+  position: relative;
+  border-inline: 1px solid var(--hp-color-border);
+}
+
+.hp-rule {
+  position: relative;
+  border-block-start: 1px solid var(--hp-color-border);
+}
+
+.hp-rule[data-edge="end"] {
+  border-block-start: 0;
+  border-block-end: 1px solid var(--hp-color-border);
+}
+
+.hp-rule-bleed {
+  border-image: linear-gradient(var(--hp-color-border), var(--hp-color-border)) 1 / 1px 0 0 / 0 100vw; /* see header */
+}
+
+.hp-rule-bleed[data-edge="end"] {
+  border-image-width: 0 0 1px;
+}
+
+/* The marks: one strip as wide as the frame plus a mark, centred on the
+   rule, with a "+" at each end made of two 1px bars, each bar centred on
+   its line. The strip starts half a mark outside the rail. */
+.hp-frame .hp-rule::after {
+  --hp-frame-arm: calc((var(--hp-frame-cross) - 1px) / 2);
+  --hp-frame-ink: linear-gradient(var(--hp-color-border-strong), var(--hp-color-border-strong));
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset-inline: calc(-1 * (var(--hp-frame-cross) + 1px) / 2);
+  inset-block-start: calc(-1 * (var(--hp-frame-cross) + 1px) / 2);
+  block-size: var(--hp-frame-cross);
+  pointer-events: none;
+  background:
+    var(--hp-frame-ink) 0 50% / var(--hp-frame-cross) 1px no-repeat,
+    var(--hp-frame-ink) var(--hp-frame-arm) 0 / 1px 100% no-repeat,
+    var(--hp-frame-ink) 100% 50% / var(--hp-frame-cross) 1px no-repeat,
+    var(--hp-frame-ink) calc(100% - var(--hp-frame-arm)) 0 / 1px 100% no-repeat;
+}
+
+.hp-frame .hp-rule[data-edge="end"]::after {
+  inset-block-start: auto;
+  inset-block-end: calc(-1 * (var(--hp-frame-cross) + 1px) / 2);
+}
+
+@media print {
+  .hp-frame .hp-rule::after {
+    display: none;
+  }
+}
+
+/* ---- Honeycomb backdrop ---------------------------------------------------
+
+   A faint honeycomb of hairlines behind a block, warming toward the accent
+   at its heart and fading out toward its edges, so the lines stay behind
+   the type. The colour is the pseudo-element's background; the hexagons
+   and the fade are its mask, so every colour stays a token. Static and
+   decorative: nothing for assistive technology, under the content.
+
+   Tune it with:
+   --hp-honeycomb-heart  where the lines are strongest and warmest
+                         (default: top centre);
+   --hp-honeycomb-fade   the mask that fades them out (an ellipse from the
+                         heart by default). */
+.hp-honeycomb {
+  --hp-honeycomb-w: calc(2.5 * var(--hp-space-8)); /* see header */
+  --hp-honeycomb-h: calc(1.7320508 * var(--hp-honeycomb-w));
+  --hp-honeycomb-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 96.995' preserveAspectRatio='none'%3E%3Cpath d='M28 0 56 16.166V48.497L28 64.663 0 48.497V16.166ZM28 64.663V96.995' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E");
+  --hp-honeycomb-heart: 50% 0%;
+  --hp-honeycomb-fade: radial-gradient(ellipse 70% 60% at var(--hp-honeycomb-heart), rgb(0 0 0 / 0.7) 15%, transparent 100%); /* mask alpha, see header */
+  position: relative;
+  isolation: isolate;
+}
+
+.hp-honeycomb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 45% 40% at var(--hp-honeycomb-heart),
+    color-mix(in oklab, var(--hp-color-accent) 30%, var(--hp-color-border)),
+    var(--hp-color-border) 100%
+  );
+  mask-image: var(--hp-honeycomb-tile), var(--hp-honeycomb-fade);
+  mask-size: var(--hp-honeycomb-w) var(--hp-honeycomb-h), 100% 100%;
+  mask-repeat: repeat, no-repeat;
+  mask-position: center top, 0 0;
+  mask-composite: intersect;
+}
+
+@media print {
+  .hp-honeycomb::before {
+    display: none;
+  }
+}
+
+/* ---- Windows ----------------------------------------------------------------
+
+   happyproto.at's product window, as a working panel: a hairline at
+   radius-lg on the surface, a bar along its top (a mono title, a status or
+   a count at its end), then the body. The product's one container: a
+   window never sits inside another.
+
+     <section class="hp-window">
+       <header class="hp-window-bar">
+         <h2 class="hp-window-title">Usage</h2>
+         <span class="hp-window-meta">5 of 8</span>
+       </header>
+       <div class="hp-window-body">…</div>
+     </section>
+
+   In the dark scheme a window is lifted the way the site lifts its windows:
+   the raised step goes half way to the border token (L 0.24), the bar one
+   step more (L 0.28), and the ring takes 35% of the accent. On those grounds
+   the muted ink takes 15% (body) or 25% (bar) of the ink so it holds 7:1,
+   the success ink 15%, and the danger ink 15% (7.4:1) or 25% on the bar
+   (7.2:1); mixes of published tokens, no new token.
+   `data-tone="danger"` rings it in the danger ink, for an irreversible
+   action's panel. */
+.hp-window {
+  --hp-window-bar: var(--hp-color-surface-raised);
+  min-inline-size: 0;
+  border: 1px solid var(--hp-color-border);
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  box-shadow: var(--hp-shadow-ambient);
+  color: var(--hp-color-fg);
+}
+
+.hp-window[data-tone="danger"] {
+  border-color: var(--hp-color-danger);
+}
+
+.hp-window-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hp-space-2) var(--hp-space-3);
+  min-block-size: 2.75rem;
+  padding: var(--hp-space-2) var(--hp-space-4);
+  border-block-end: 1px solid var(--hp-color-border);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  background: var(--hp-window-bar);
+}
+
+.hp-window-title {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
+  color: var(--hp-color-fg);
+}
+
+.hp-window-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--hp-space-2) var(--hp-space-4);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-variant-numeric: var(--hp-font-numeric);
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-window-body {
+  padding: var(--hp-space-4);
+}
+
+/* The lifted values are worked out once, on the root, from the theme's own
+   tokens; a window then points its tokens at them. (A token defined in terms
+   of itself on the same element is a cycle, and the browser drops it.) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --hp-window-raised: color-mix(in oklch, var(--hp-color-surface-raised), var(--hp-color-border)); /* see header */
+    --hp-window-muted: color-mix(in oklch, var(--hp-color-fg-muted) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-success: color-mix(in oklch, var(--hp-color-success) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-danger: color-mix(in oklch, var(--hp-color-danger) 85%, var(--hp-color-fg)); /* see header */
+    --hp-window-bar-danger: color-mix(in oklch, var(--hp-color-danger) 75%, var(--hp-color-fg)); /* see header */
+    --hp-window-bar-muted: color-mix(in oklch, var(--hp-color-fg-muted) 75%, var(--hp-color-fg)); /* see header */
+    --hp-window-ring: color-mix(in oklab, var(--hp-color-accent) 35%, var(--hp-color-border-strong)); /* see header */
+  }
+  :root:not([data-theme="light"]) .hp-window {
+    --hp-color-surface-raised: var(--hp-window-raised);
+    --hp-color-fg-muted: var(--hp-window-muted);
+    --hp-color-success: var(--hp-window-success);
+  --hp-color-danger: var(--hp-window-danger);
+    --hp-color-danger: var(--hp-window-danger);
+    --hp-window-bar: var(--hp-color-border);
+    border-color: var(--hp-window-ring);
+    background: var(--hp-window-raised);
+    box-shadow: var(--hp-shadow-ambient), var(--hp-shadow-overlay);
+  }
+  :root:not([data-theme="light"]) .hp-window-bar {
+    --hp-color-fg-muted: var(--hp-window-bar-muted);
+  --hp-color-danger: var(--hp-window-bar-danger);
+    --hp-color-danger: var(--hp-window-bar-danger);
+    --hp-color-border: var(--hp-color-border-strong);
+  }
+  :root:not([data-theme="light"]) .hp-window[data-tone="danger"] {
+    border-color: var(--hp-color-danger);
+  }
+}
+
+:root[data-theme="dark"] {
+  --hp-window-raised: color-mix(in oklch, var(--hp-color-surface-raised), var(--hp-color-border));
+  --hp-window-muted: color-mix(in oklch, var(--hp-color-fg-muted) 85%, var(--hp-color-fg));
+  --hp-window-success: color-mix(in oklch, var(--hp-color-success) 85%, var(--hp-color-fg));
+  --hp-window-danger: color-mix(in oklch, var(--hp-color-danger) 85%, var(--hp-color-fg));
+  --hp-window-bar-danger: color-mix(in oklch, var(--hp-color-danger) 75%, var(--hp-color-fg));
+  --hp-window-bar-muted: color-mix(in oklch, var(--hp-color-fg-muted) 75%, var(--hp-color-fg));
+  --hp-window-ring: color-mix(in oklab, var(--hp-color-accent) 35%, var(--hp-color-border-strong));
+}
+
+:root[data-theme="dark"] .hp-window {
+  --hp-color-surface-raised: var(--hp-window-raised);
+  --hp-color-fg-muted: var(--hp-window-muted);
+  --hp-color-success: var(--hp-window-success);
+  --hp-color-danger: var(--hp-window-danger);
+  --hp-window-bar: var(--hp-color-border);
+  border-color: var(--hp-window-ring);
+  background: var(--hp-window-raised);
+  box-shadow: var(--hp-shadow-ambient), var(--hp-shadow-overlay);
+}
+
+:root[data-theme="dark"] .hp-window-bar {
+  --hp-color-fg-muted: var(--hp-window-bar-muted);
+  --hp-color-danger: var(--hp-window-bar-danger);
+  --hp-color-border: var(--hp-color-border-strong);
+}
+
+:root[data-theme="dark"] .hp-window[data-tone="danger"] {
+  border-color: var(--hp-color-danger);
+}
+
+/* ---- States -----------------------------------------------------------------
+
+   One state language, the site's: a status in the mono at its medium
+   weight, after a 1em mark that carries its shape. The word carries the
+   meaning; the mark's shape (a dot, a ring, a half ring, a tick, a cross, a
+   bar) carries it again without colour. `data-state`:
+   - live       a solid success dot (running, connected, responding);
+   - done       the tick in the success ink;
+   - running    the half ring in the accent (in progress);
+   - pending    the ring in the muted ink (not yet);
+   - failed     the cross in the danger ink;
+   - idle       the bar in the muted ink (stopped). */
+.hp-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-2);
+  min-inline-size: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-medium);
+  line-height: var(--hp-leading-snug);
+  color: var(--hp-color-fg);
+  white-space: nowrap;
+}
+
+.hp-state > svg {
+  flex: none;
+  inline-size: 1em;
+  block-size: 1em;
+}
+
+.hp-state[data-state="live"] > svg,
+.hp-state[data-state="done"] > svg {
+  color: var(--hp-color-success);
+}
+
+.hp-state[data-state="running"] > svg {
+  color: var(--hp-color-accent);
+}
+
+.hp-state[data-state="pending"] > svg,
+.hp-state[data-state="idle"] > svg {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-state[data-state="idle"] {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-state[data-state="failed"] {
+  color: var(--hp-color-danger);
+}
+
+/* ---- Figures ----------------------------------------------------------------
+
+   A measurement: the mono at its medium weight, tabular, in the ink, so a
+   column of them aligns and a figure that updates never jitters. A label
+   (.hp-label) above it, a unit or a denominator after it in the muted ink
+   (.hp-figure-unit). Title size by default; `data-size="lg"` for the one
+   figure a panel is about. */
+.hp-figure {
+  margin: 0;
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-xl);
+  font-weight: var(--hp-weight-medium);
+  font-variant-numeric: var(--hp-font-numeric);
+  letter-spacing: var(--hp-tracking-tight);
+  line-height: var(--hp-leading-tight);
+  color: var(--hp-color-fg);
+}
+
+.hp-figure[data-size="lg"] {
+  font-size: var(--hp-text-3xl);
+}
+
+.hp-figure-unit {
+  margin-inline-start: var(--hp-space-1);
+  font-size: var(--hp-text-sm);
+  font-weight: var(--hp-weight-regular);
+  letter-spacing: var(--hp-tracking-normal);
+  color: var(--hp-color-fg-muted);
+}
+
+/* ---- Motion and forced colours -------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .hp-button,
+  .hp-link,
+  .hp-field {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .hp-button-primary {
+    border-color: ButtonText;
+  }
+  .hp-honeycomb::before,
+  .hp-frame .hp-rule::after {
+    display: none;
+  }
+}
