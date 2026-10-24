@@ -1,6 +1,6 @@
 {
   "name": "@happyview/design-system",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Design tokens and shared components for HappyProto, gated on WCAG AAA and colour-vision separation.",
   "license": "MIT",
   "type": "module",
