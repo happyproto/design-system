@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/happyproto/design-system/compare/v1.1.0...v1.1.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* name the repository for npm provenance ([e397b16](https://github.com/happyproto/design-system/commit/e397b164182c31d066b2db3ef77f564ac3cfc886))
+
 # [1.1.0](https://github.com/happyproto/design-system/compare/v1.0.0...v1.1.0) (2026-10-24)
 
 
