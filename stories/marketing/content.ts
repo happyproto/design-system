@@ -875,10 +875,11 @@ export const signup = {
    * added here in round 5, moved up into the close's own line (`cta.line`).
    * Owner round 6: the hero credit now says the promise in full, in the
    * owner's words; this short form stays, so the two forms never repeat
-   * each other word for word.
+   * each other word for word. HAP-13 (2026-10-28): it ends as the success
+   * line does, since only testers who are selected get a beta invite.
    */
   status: {
-    idle: "One email when it opens, or a beta invite sooner.",
+    idle: "One email when it opens, or sooner if you’re selected for the closed beta.",
     submitting: "Adding you to the waitlist…",
     success:
       "We’ll send an email to {email} when HappyProto opens, or sooner if you’re selected for the closed beta.",
