@@ -26,7 +26,7 @@
  * - Contact: support@happyproto.at (owner-provided), in the FAQ's email
  *   answer, as a mailto link; Bluesky stays the route everywhere else.
  * - Dates: an invite-only beta starts around the end of October, and
- *   launch is targeted for November.
+ *   launch is targeted for December.
  * - Moving: a tool to make migrating a self-hosted instance painless is in
  *   the works.
  * - Not to be said: auth plugins, Steam, Xbox or itch.io; nothing names or
@@ -976,7 +976,7 @@ export const faq = {
       /** Owner round 3: the dates (owner claims), in place of "What isn’t ready yet?". */
       id: "open",
       q: "When will it open?",
-      a: "An invite-only beta starts around the end of October, and launch is targeted for November.",
+      a: "An invite-only beta starts around the end of October, and launch is targeted for December.",
     },
     {
       id: "move",
