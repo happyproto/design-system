@@ -320,7 +320,10 @@ input.hp-field:disabled {
    logotype.light.svg on a dark one. They follow the theme the same way the
    tokens do: the system by default, data-theme when it is set.
      <img class="hp-logotype hp-logotype-on-light" src=".../logotype.dark.svg" alt="HappyProto">
-     <img class="hp-logotype hp-logotype-on-dark" src=".../logotype.light.svg" alt="">
+     <img class="hp-logotype hp-logotype-on-dark" src=".../logotype.light.svg" alt="HappyProto">
+   Both carry the name: the one not shown is display: none, so out of the
+   accessibility tree and never read twice. An empty alt on either leaves the
+   logotype unnamed in that theme, and a link wrapping it with no name.
    Size it by block-size; the width follows. */
 .hp-logotype {
   display: block;

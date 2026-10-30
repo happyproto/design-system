@@ -83,6 +83,11 @@ import onLight from "@happyview/design-system/logotype.dark.svg";
 import onDark from "@happyview/design-system/logotype.light.svg";
 ```
 
+Give **both** images the name, `alt="HappyProto"`. Only one is displayed at a
+time (the other is `display: none`, so out of the accessibility tree), and an
+empty `alt` on either leaves the logotype, and any link around it, unnamed in
+that theme.
+
 Class names are public API on the same terms as token names (below). A test
 fails the build if `components.css` writes a literal colour or names a token
 that does not exist.

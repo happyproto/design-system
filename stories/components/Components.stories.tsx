@@ -65,7 +65,7 @@ export const Logotype: StoryObj = {
     <div style={stack}>
       <span>
         <img className="hp-logotype hp-logotype-on-light" src={onLight} alt="HappyProto" />
-        <img className="hp-logotype hp-logotype-on-dark" src={onDark} alt="" />
+        <img className="hp-logotype hp-logotype-on-dark" src={onDark} alt="HappyProto" />
       </span>
     </div>
   ),
