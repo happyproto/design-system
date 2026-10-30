@@ -1,0 +1,40 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check
+    runs-on: depot-ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+
+      - run: bun install --frozen-lockfile
+
+      # The gates publish.yml and storybook.yml run before anything ships, so
+      # a change that would stop a release or the Storybook deploy fails here
+      # first.
+      - name: Tests
+        run: bun test
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Build
+        run: bun run build
+
+      - name: Build Storybook
+        run: bun run build-storybook
