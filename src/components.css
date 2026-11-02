@@ -3,7 +3,9 @@
  * The pieces happyproto.at and the dashboard both draw: buttons, links,
  * tags, fields, the mono label, the logotype, the technical-drawing frame
  * (rails, rules and their "+" marks), the honeycomb backdrop, and the
- * product's own vocabulary: the window, its states and its figures. Plain CSS,
+ * product's own vocabulary: the window, its states and its figures. Then
+ * the workbench the docs draw: the terminal, the file tree, the editor,
+ * callouts and reference tables. Plain CSS,
  * no markup contract beyond the class names, which are public API on the
  * same terms as the tokens: renaming one is a major version.
  *
@@ -32,6 +34,15 @@
  *   hairline token, warmed 30% toward the accent at the heart;
  * - 100vw as the outset of a bleeding rule, clipped by its scroller
  *   (see .hp-rule-bleed);
+ * - the workbench pieces (terminal, file tree, editor, callout, table): the
+ *   1em marks and their 16px artwork; 1ch between a command's "$" and the
+ *   command, and between a state's mark and its line; 0.75em for a folder's
+ *   chevron, turned 90deg when open; 0.1em and 0.2em to sit a mark or an
+ *   underline on the text; 18rem, the most an editor gives its tree; 40rem, the column width
+ *   under which a table stacks and an editor's tree steps aside, as
+ *   happyview.dev's docs have it; and two tints, each measured at 7:1 in
+ *   tests/workbench.test.ts: a callout's ground, 6% of its ink on the page,
+ *   and the current tree row, 5% of the accent on the surface, set in the medium weight;
  * - system colours under forced colours, where every token is replaced.
  */
 
@@ -692,12 +703,664 @@ input.hp-field:disabled {
   color: var(--hp-color-fg-muted);
 }
 
+/* ---- Marks ------------------------------------------------------------------
+
+   The drawn marks the workbench pieces below put before a line, a file or a
+   callout. Each is an SVG used as a mask over the element's own ink, so the
+   colour is always a token and the shape carries the meaning again without
+   it. 16px artwork on a 1em box, 1.25 to 1.75 stroke; decorative, so they
+   live in pseudo-elements, which assistive technology does not read. */
+.hp-term-bar::before,
+.hp-term-line[data-state]::before,
+.hp-tree-row::before,
+.hp-tree summary.hp-tree-row::after,
+.hp-editor-tab::before,
+.hp-callout::before {
+  content: "";
+  flex: none;
+  inline-size: 1em;
+  block-size: 1em;
+  background: currentColor;
+  mask: var(--hp-mark) center / contain no-repeat;
+}
+
+/* ---- The terminal -----------------------------------------------------------
+
+   A shell session on the page: a bar naming where it runs, then the lines.
+   It follows the theme, on the surface ground with the bar one step raised,
+   so every ink in it is a palette ink on a gated ground.
+
+     <figure class="hp-term">
+       <figcaption class="hp-term-bar">
+         <span class="hp-term-title">~/my-app</span>
+         <button class="hp-term-copy" type="button">Copy</button>
+       </figcaption>
+       <pre class="hp-term-body"><span class="hp-term-line hp-term-cmd"><span class="hp-term-program">hpy</span> happyview dev <span class="hp-term-flag">--locked</span></span>
+       <span class="hp-term-line hp-term-out">dashboard: <a href="…">…</a></span></pre>
+       <div class="hp-term-result">
+         <p class="hp-term-result-label">Output</p>
+         <pre class="hp-term-body">{"message":"Hello, Ada!"}</pre>
+       </div>
+     </figure>
+
+   Lines, each a .hp-term-line inside the body:
+   - .hp-term-cmd       a command, after a "$" that is never selected or
+                        copied; .hp-term-program, .hp-term-flag and
+                        .hp-term-string inside it in the ink, the accent and
+                        the success ink;
+   - .hp-term-comment   a "#" comment, in the muted ink;
+   - .hp-term-out       what the command printed, in the muted ink;
+   - data-state         done, warning or failed: the state's mark before the
+                        line, and the line in the state's ink when it is a
+                        warning or a failure; .hp-term-where inside it for a
+                        file:line.
+   .hp-term-result is what came back, attached under the command on the
+   page's own ground. Copy is a quiet button; what it copies (the commands,
+   without "$") is the page's to wire. */
+.hp-term {
+  margin: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--hp-color-border);
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  box-shadow: var(--hp-shadow-ambient);
+  color: var(--hp-color-fg);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-relaxed);
+}
+
+.hp-term-bar {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3 4 4 4-4 4M8.5 12.5H13' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  display: flex;
+  align-items: center;
+  gap: var(--hp-space-2) var(--hp-space-3);
+  min-block-size: 2.75rem; /* a window bar's height, see header */
+  padding-inline: var(--hp-space-4) var(--hp-space-2);
+  border-start-start-radius: inherit;
+  border-start-end-radius: inherit;
+  background: var(--hp-color-surface-raised);
+  color: var(--hp-color-fg-muted);
+  font-size: var(--hp-text-xs);
+}
+
+.hp-term-bar::before {
+  color: var(--hp-color-accent-alt);
+}
+
+.hp-term-title {
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--hp-color-fg);
+  font: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hp-term-copy {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-2);
+  min-block-size: 2.75rem; /* 44px target, see header */
+  margin-inline-start: auto;
+  padding-inline: var(--hp-space-3);
+  border: 0;
+  border-radius: var(--hp-radius-md);
+  background: transparent;
+  color: var(--hp-color-fg-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color var(--hp-motion-duration-fast) var(--hp-motion-ease),
+    color var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.hp-term-copy:hover {
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+}
+
+.hp-term-copy:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: -2px;
+}
+
+.hp-term-body {
+  margin: 0;
+  padding: var(--hp-space-4);
+  overflow-x: auto;
+  font: inherit;
+  tab-size: 2;
+}
+
+.hp-term-line {
+  display: block;
+  min-block-size: calc(var(--hp-leading-relaxed) * 1em);
+  white-space: pre;
+}
+
+.hp-term-cmd::before {
+  content: "$";
+  margin-inline-end: 1ch;
+  color: var(--hp-color-accent-alt);
+  user-select: none;
+}
+
+.hp-term-program {
+  font-weight: var(--hp-weight-semibold);
+}
+
+.hp-term-flag {
+  color: var(--hp-color-accent);
+}
+
+.hp-term-string {
+  color: var(--hp-color-success);
+}
+
+.hp-term-comment {
+  color: var(--hp-color-fg-muted);
+  font-style: italic;
+}
+
+.hp-term-out {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-term-body a {
+  color: var(--hp-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+.hp-term-cmd + .hp-term-out,
+.hp-term-cmd + .hp-term-line[data-state],
+.hp-term-out + .hp-term-cmd,
+.hp-term-line[data-state] + .hp-term-cmd {
+  margin-block-start: var(--hp-space-2);
+}
+
+.hp-term-line[data-state] {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+}
+
+.hp-term-line[data-state="done"]::before {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m3.5 8.5 3 3 6-7' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  color: var(--hp-color-success);
+}
+
+.hp-term-line[data-state="warning"] {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 2 14.5 13.5h-13Z' fill='black' fill-opacity='.2' stroke='black' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M8 6.5v3' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='11.5' r='.85'/%3E%3C/svg%3E");
+  color: var(--hp-color-warning);
+}
+
+.hp-term-line[data-state="failed"] {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4 4 8 8M12 4l-8 8' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round'/%3E%3C/svg%3E");
+  color: var(--hp-color-danger);
+}
+
+.hp-term-where {
+  color: var(--hp-color-fg);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.25em;
+}
+
+.hp-term-result {
+  background: var(--hp-color-bg);
+}
+
+.hp-term-result > .hp-term-body {
+  padding-block-start: 0;
+}
+
+.hp-term-result-label {
+  margin: 0;
+  padding: var(--hp-space-3) var(--hp-space-4) var(--hp-space-1);
+  color: var(--hp-color-fg-muted);
+  font-size: var(--hp-text-xs);
+}
+
+/* ---- The file tree ----------------------------------------------------------
+
+   A project's files, as an editor lists them: folders open and close, a
+   drawn mark before each name, and a guide down each open folder.
+
+     <figure class="hp-tree">
+       <ul>
+         <li><details open>
+           <summary class="hp-tree-row" data-kind="dir">src<span class="hp-tree-fold">/lexicons/com/example/</span></summary>
+           <ul>
+             <li class="hp-tree-row" data-type="data">hello.json<span class="hp-tree-note">lexicon</span></li>
+             <li class="hp-tree-row" data-type="script" aria-current="true">hello.lua</li>
+           </ul>
+         </details></li>
+       </ul>
+     </figure>
+
+   - data-kind="dir" on a folder's row, a <summary> when it opens and
+     closes, or any element when it doesn't;
+   - data-type on a file's row picks its mark's ink: "script" (lua, js, ts)
+     the success ink, "config" (toml, lock) the orange, "data" (json) the
+     accent, anything else the muted ink;
+   - .hp-tree-dim for a name that matters less (a dotfile);
+   - .hp-tree-fold for the folders a single-child chain folds into one row;
+   - .hp-tree-note for a short note at the row's end;
+   - aria-current on the row the text is about. */
+.hp-tree {
+  margin: 0;
+  min-inline-size: 0;
+  padding: var(--hp-space-3) var(--hp-space-2);
+  overflow-x: auto;
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  box-shadow: inset 0 0 0 1px var(--hp-color-border);
+  color: var(--hp-color-fg);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-snug);
+}
+
+.hp-tree ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hp-tree ul ul {
+  margin-inline-start: calc(var(--hp-space-4) - 1px);
+  padding-inline-start: var(--hp-space-2);
+  border-inline-start: 1px solid var(--hp-color-border);
+}
+
+.hp-tree-row {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 1.75h5.25L12.5 5v8.75a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2.25a.5.5 0 0 1 .5-.5Z' fill='none' stroke='black' stroke-width='1.25' stroke-linejoin='round'/%3E%3Cpath d='M9 1.75V5.5h3.5' fill='none' stroke='black' stroke-width='1.25' stroke-linejoin='round'/%3E%3Crect x='5.5' y='8' width='5' height='1.25' rx='.6'/%3E%3Crect x='5.5' y='10.5' width='3.5' height='1.25' rx='.6'/%3E%3C/svg%3E");
+  display: flex;
+  align-items: center;
+  gap: var(--hp-space-2);
+  min-block-size: var(--hp-space-8);
+  padding-inline: var(--hp-space-6) var(--hp-space-2); /* past a folder's chevron */
+  border-radius: var(--hp-radius-sm);
+  color: var(--hp-color-fg);
+  white-space: nowrap;
+}
+
+.hp-tree-row::before {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-tree-row[data-type="script"]::before {
+  color: var(--hp-color-success);
+}
+
+.hp-tree-row[data-type="config"]::before {
+  color: var(--hp-color-accent-alt);
+}
+
+.hp-tree-row[data-type="data"]::before {
+  color: var(--hp-color-accent);
+}
+
+.hp-tree-row[data-kind="dir"] {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1.75 4.25c0-.83.67-1.5 1.5-1.5h3l1.5 1.5h5c.83 0 1.5.67 1.5 1.5v6.5c0 .83-.67 1.5-1.5 1.5h-9.5c-.83 0-1.5-.67-1.5-1.5Z' fill='black' fill-opacity='.25' stroke='black' stroke-width='1.25' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.hp-tree-row[data-kind="dir"]::before {
+  color: var(--hp-color-accent-alt);
+}
+
+.hp-tree summary.hp-tree-row {
+  position: relative;
+  list-style: none;
+  cursor: pointer;
+}
+
+.hp-tree summary.hp-tree-row::-webkit-details-marker {
+  display: none;
+}
+
+/* The chevron: drawn in the row's gutter, turned a quarter when open. */
+.hp-tree summary.hp-tree-row::after {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m6 3.5 4.5 4.5L6 12.5' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  position: absolute;
+  inset-inline-start: var(--hp-space-1);
+  inline-size: 0.75em;
+  block-size: 0.75em;
+  color: var(--hp-color-fg-muted);
+  transition: transform var(--hp-motion-duration-fast) var(--hp-motion-ease);
+}
+
+.hp-tree details[open] > summary.hp-tree-row::after {
+  transform: rotate(90deg);
+}
+
+.hp-tree summary.hp-tree-row:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: -2px;
+}
+
+.hp-tree-row:hover {
+  background: var(--hp-color-surface-raised);
+}
+
+.hp-tree-row[aria-current] {
+  background: color-mix(in oklab, var(--hp-color-accent) 5%, var(--hp-color-surface)); /* see header */
+  font-weight: var(--hp-weight-medium);
+}
+
+.hp-tree .hp-tree-dim,
+.hp-tree .hp-tree-fold,
+.hp-tree .hp-tree-note {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-tree-note {
+  margin-inline-start: auto;
+  padding-inline-start: var(--hp-space-4);
+  font-family: var(--hp-font-sans);
+  font-size: var(--hp-text-xs);
+}
+
+/* ---- The editor -------------------------------------------------------------
+
+   A file open on the page: a tab with the file's mark, the path to it, then
+   the code. With an .hp-tree before the pane, the project sits beside it;
+   in a column under 40rem the tree steps aside and the file stays.
+
+     <figure class="hp-editor">
+       <div class="hp-tree">…</div>
+       <div class="hp-editor-pane">
+         <div class="hp-editor-tabs"><span class="hp-editor-tab" data-type="script">hello.lua</span></div>
+         <p class="hp-editor-path">src › lexicons › com › example › <b>hello.lua</b></p>
+         <div class="hp-editor-body">…the code block…</div>
+       </div>
+     </figure>
+
+   The tab's data-type is the tree row's. The body holds whatever renders
+   the code; the editor draws only the frame around it. */
+.hp-editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  border: 1px solid var(--hp-color-border);
+  border-radius: var(--hp-radius-lg);
+  background: var(--hp-color-surface);
+  container-type: inline-size;
+}
+
+.hp-editor:has(> .hp-tree) {
+  grid-template-columns: fit-content(18rem) minmax(0, 1fr);
+}
+
+.hp-editor > .hp-tree {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hp-editor-pane {
+  min-inline-size: 0;
+  background: var(--hp-color-bg);
+}
+
+.hp-editor > .hp-tree + .hp-editor-pane {
+  border-inline-start: 1px solid var(--hp-color-border);
+}
+
+.hp-editor-tabs {
+  display: flex;
+  align-items: end;
+  min-block-size: 2.75rem; /* a window bar's height, see header */
+  overflow-x: auto;
+  background: var(--hp-color-surface);
+}
+
+.hp-editor-tab {
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 1.75h5.25L12.5 5v8.75a.5.5 0 0 1-.5.5H4a.5.5 0 0 1-.5-.5V2.25a.5.5 0 0 1 .5-.5Z' fill='none' stroke='black' stroke-width='1.25' stroke-linejoin='round'/%3E%3Cpath d='M9 1.75V5.5h3.5' fill='none' stroke='black' stroke-width='1.25' stroke-linejoin='round'/%3E%3Crect x='5.5' y='8' width='5' height='1.25' rx='.6'/%3E%3Crect x='5.5' y='10.5' width='3.5' height='1.25' rx='.6'/%3E%3C/svg%3E");
+  display: inline-flex;
+  align-items: center;
+  gap: var(--hp-space-2);
+  min-block-size: 2.75rem; /* see header */
+  padding-inline: var(--hp-space-4);
+  border-start-end-radius: var(--hp-radius-md);
+  background: var(--hp-color-bg);
+  color: var(--hp-color-fg);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-xs);
+  white-space: nowrap;
+}
+
+.hp-editor:not(:has(> .hp-tree)) .hp-editor-tab {
+  border-start-start-radius: inherit;
+}
+
+.hp-editor-tab::before {
+  color: var(--hp-color-fg-muted);
+}
+
+.hp-editor-tab[data-type="script"]::before {
+  color: var(--hp-color-success);
+}
+
+.hp-editor-tab[data-type="config"]::before {
+  color: var(--hp-color-accent-alt);
+}
+
+.hp-editor-tab[data-type="data"]::before {
+  color: var(--hp-color-accent);
+}
+
+.hp-editor-path {
+  margin: 0;
+  padding: var(--hp-space-2) var(--hp-space-4) 0;
+  overflow-x: auto;
+  color: var(--hp-color-fg-muted);
+  font-family: var(--hp-font-mono);
+  font-size: var(--hp-text-xs);
+  white-space: nowrap;
+}
+
+.hp-editor-path b {
+  color: var(--hp-color-fg);
+  font-weight: var(--hp-weight-regular);
+}
+
+@container (max-width: 40rem) {
+  .hp-editor:has(> .hp-tree) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .hp-editor > .hp-tree {
+    display: none;
+  }
+}
+
+/* ---- Callouts ---------------------------------------------------------------
+
+   A note set apart from the text: a drawn mark, a title in the kind's ink,
+   then the body, on the page tinted 6% toward that ink. No rule down its
+   side; the mark's shape tells the kinds apart without colour.
+   `data-kind`:
+   - note     the accent, a circle with an i;
+   - tip      the success ink, a four-point star;
+   - caution  the warning ink, a triangle;
+   - danger   the danger ink, an octagon with a cross.
+
+     <aside class="hp-callout" data-kind="caution">
+       <p class="hp-callout-title">Writes go to the real network</p>
+       <p>…</p>
+     </aside>
+
+   6% is the most tint that keeps every ink on it at 7:1 in the light theme:
+   the body, the muted ink, the kind's own ink and a link's accent
+   (tests/workbench.test.ts measures each). */
+.hp-callout {
+  --hp-callout-ink: var(--hp-color-accent);
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6.25' fill='black' fill-opacity='.2' stroke='black' stroke-width='1.4'/%3E%3Cpath d='M8 7.25v4' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='5' r='.85'/%3E%3C/svg%3E");
+  display: grid;
+  grid-template-columns: 1.25em minmax(0, 1fr);
+  gap: var(--hp-space-1) var(--hp-space-3);
+  margin: 0;
+  padding: var(--hp-space-4);
+  border-radius: var(--hp-radius-lg);
+  background: color-mix(in oklab, var(--hp-callout-ink) 6%, var(--hp-color-bg)); /* see header */
+  color: var(--hp-color-fg);
+}
+
+.hp-callout::before {
+  grid-row: 1;
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  margin-block-start: 0.1em;
+  color: var(--hp-callout-ink);
+}
+
+.hp-callout > * {
+  grid-column: 2;
+  margin: 0;
+}
+
+.hp-callout > :first-child {
+  grid-row: 1;
+}
+
+.hp-callout-title {
+  color: var(--hp-callout-ink);
+  font-weight: var(--hp-weight-semibold);
+}
+
+.hp-callout[data-kind="tip"] {
+  --hp-callout-ink: var(--hp-color-success);
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1.75 9.6 6.4 14.25 8 9.6 9.6 8 14.25 6.4 9.6 1.75 8 6.4 6.4Z' fill='black' fill-opacity='.2' stroke='black' stroke-width='1.3' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.hp-callout[data-kind="caution"] {
+  --hp-callout-ink: var(--hp-color-warning);
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 2 14.5 13.5h-13Z' fill='black' fill-opacity='.2' stroke='black' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='M8 6.5v3' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='8' cy='11.5' r='.85'/%3E%3C/svg%3E");
+}
+
+.hp-callout[data-kind="danger"] {
+  --hp-callout-ink: var(--hp-color-danger);
+  --hp-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 1.75h5l3.75 3.75v5l-3.75 3.75h-5L1.75 10.5v-5Z' fill='black' fill-opacity='.2' stroke='black' stroke-width='1.4' stroke-linejoin='round'/%3E%3Cpath d='m5.75 5.75 4.5 4.5m0-4.5-4.5 4.5' stroke='black' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.hp-callout a {
+  color: var(--hp-color-accent);
+  text-underline-offset: 0.2em;
+}
+
+/* ---- Tables -----------------------------------------------------------------
+
+   A reference table: the first column (the name being described) takes the
+   room its content needs on one line, and the prose columns share the
+   rest. Rows are parted by a hairline, the head is small and muted, and
+   cells sit on their first line's baseline. Wrap it in .hp-table-scroll:
+   the table scrolls rather than squeezing, and in a column under 40rem it
+   stacks, each row a block and each cell after the first naming its column
+   from data-label.
+
+     <div class="hp-table-scroll" role="region" aria-label="…" tabindex="0">
+       <table class="hp-table">…<td data-label="What happens">…</td>…</table>
+     </div>
+
+   Stacking changes every part's display, which drops the table's
+   semantics, so a table that may stack states its roles (role="table",
+   "rowgroup", "row", "columnheader", "cell"). */
+.hp-table-scroll {
+  min-inline-size: 0;
+  overflow-x: auto;
+  container-type: inline-size;
+}
+
+.hp-table-scroll:focus-visible {
+  outline: 2px solid var(--hp-color-accent);
+  outline-offset: 2px;
+}
+
+.hp-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--hp-text-sm);
+  line-height: var(--hp-leading-snug);
+}
+
+.hp-table th {
+  padding: 0 var(--hp-space-4) var(--hp-space-2) 0;
+  color: var(--hp-color-fg-muted);
+  font-size: var(--hp-text-xs);
+  font-weight: var(--hp-weight-medium);
+  text-align: start;
+  vertical-align: bottom;
+}
+
+.hp-table td {
+  padding: var(--hp-space-3) var(--hp-space-4) var(--hp-space-3) 0;
+  border-block-start: 1px solid var(--hp-color-border);
+  vertical-align: baseline;
+}
+
+.hp-table :is(th, td):last-child {
+  padding-inline-end: 0;
+}
+
+.hp-table :is(th, td):first-child {
+  white-space: nowrap;
+}
+
+.hp-table td:first-child {
+  font-weight: var(--hp-weight-medium);
+}
+
+@container (max-width: 40rem) {
+  .hp-table,
+  .hp-table :is(thead, tbody, tr, td) {
+    display: block;
+    inline-size: auto;
+  }
+  .hp-table thead {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .hp-table tr {
+    padding-block: var(--hp-space-3);
+    border-block-start: 1px solid var(--hp-color-border);
+  }
+  .hp-table td,
+  .hp-table td:first-child {
+    inline-size: auto;
+    padding: 0;
+    border: 0;
+    white-space: normal;
+  }
+  .hp-table td + td {
+    margin-block-start: var(--hp-space-2);
+  }
+  .hp-table td:empty {
+    display: none;
+  }
+  .hp-table td + td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--hp-color-fg-muted);
+    font-size: var(--hp-text-xs);
+    font-weight: var(--hp-weight-medium);
+  }
+}
+
 /* ---- Motion and forced colours -------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .hp-button,
   .hp-link,
-  .hp-field {
+  .hp-field,
+  .hp-term-copy,
+  .hp-tree summary.hp-tree-row::after {
     transition: none;
   }
 }
@@ -709,5 +1372,23 @@ input.hp-field:disabled {
   .hp-honeycomb::before,
   .hp-frame .hp-rule::after {
     display: none;
+  }
+  /* The marks paint their ink as a background, which forced colours
+     replace; keep them in the forced text colour instead. */
+  .hp-term-bar::before,
+  .hp-term-line[data-state]::before,
+  .hp-tree-row::before,
+  .hp-tree summary.hp-tree-row::after,
+  .hp-editor-tab::before,
+  .hp-callout::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+  .hp-tree,
+  .hp-callout {
+    border: 1px solid CanvasText;
+  }
+  .hp-tree-row[aria-current] {
+    outline: 1px solid Highlight;
   }
 }
