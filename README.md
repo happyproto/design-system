@@ -75,6 +75,11 @@ import "@happyview/design-system/components.css";
 | `hp-window` | The product's panel: `hp-window-bar` holding an `hp-window-title` and `hp-window-meta`, then `hp-window-body`; `data-tone="danger"` rings it in the danger ink. Lifted in dark, as on the site |
 | `hp-state` | A status in the mono after a 1em mark; `data-state` is `live`, `done`, `running`, `pending`, `failed` or `idle` |
 | `hp-figure` | A measurement in the mono, tabular; `data-size="lg"` for the one a panel is about, `hp-figure-unit` for its unit |
+| `hp-term` | A terminal session: `hp-term-bar` (an `hp-term-title` and an `hp-term-copy` button), then `hp-term-body` holding `hp-term-line`s: `hp-term-cmd` (after a `$` that is never copied), `hp-term-comment`, `hp-term-out`, or a `data-state` of `done`, `warning` or `failed`; `hp-term-result` for what came back. Follows the theme |
+| `hp-tree` | A project's files: `hp-tree-row`s in nested lists, `data-kind="dir"` on a folder's (a `<summary>` to open and close it), `data-type` of `script`, `config` or `data` on a file's; `hp-tree-fold`, `hp-tree-dim`, `hp-tree-note`; `aria-current` on the file the text is about |
+| `hp-editor` | A file open on the page: `hp-editor-pane` with `hp-editor-tabs`, an `hp-editor-tab` (same `data-type`), `hp-editor-path` and `hp-editor-body`; an `hp-tree` before the pane puts the project beside it |
+| `hp-callout` | A note set apart from the text, with `hp-callout-title`; `data-kind` is `tip`, `caution` or `danger`, or none for a note. Each kind has its own drawn mark |
+| `hp-table` | A reference table in an `hp-table-scroll`: the first column fits its content, the rest share the room, and under 40rem it stacks, each cell naming its column from `data-label` |
 
 The logotype files are exported too, so a bundler can resolve them:
 
