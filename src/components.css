@@ -1194,6 +1194,14 @@ input.hp-field:disabled {
   margin: 0;
   padding: var(--hp-space-2) var(--hp-space-4) 0;
   overflow-x: auto;
+  /* The terminal's edge shade, on the pane's ground (see .hp-term). */
+  background:
+    linear-gradient(to right, var(--hp-color-bg) 40%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--hp-color-bg) 40%, transparent) right / 2rem 100% no-repeat local,
+    linear-gradient(to right, color-mix(in oklab, var(--hp-color-fg) 14%, transparent), transparent) left / 0.75rem 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in oklab, var(--hp-color-fg) 14%, transparent), transparent) right / 0.75rem 100% no-repeat scroll;
+  background-color: var(--hp-color-bg);
+  scrollbar-color: var(--hp-color-border-strong) transparent;
   color: var(--hp-color-fg-muted);
   font-family: var(--hp-font-mono);
   font-size: var(--hp-text-xs);
