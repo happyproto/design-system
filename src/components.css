@@ -755,7 +755,10 @@ input.hp-field:disabled {
                         warning or a failure; .hp-term-where inside it for a
                         file:line.
    .hp-term-result is what came back, attached under the command on the
-   page's own ground. Copy is a quiet button; what it copies (the commands,
+   page's own ground; a terminal holding only a result is a command's
+   output shown apart from it. A body shades its edge while a line runs
+   past it (40% of 2rem of its ground, then 14% of the ink over 0.75rem).
+   Copy is a quiet button; what it copies (the commands,
    without "$") is the page's to wire. */
 .hp-term {
   margin: 0;
@@ -828,11 +831,20 @@ input.hp-field:disabled {
 }
 
 .hp-term-body {
+  --hp-term-ground: var(--hp-color-surface);
   margin: 0;
   padding: var(--hp-space-4);
   overflow-x: auto;
   font: inherit;
   tab-size: 2;
+  /* A shade at an edge while there is more line to scroll to. */
+  background:
+    linear-gradient(to right, var(--hp-term-ground) 40%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--hp-term-ground) 40%, transparent) right / 2rem 100% no-repeat local,
+    linear-gradient(to right, color-mix(in oklab, var(--hp-color-fg) 14%, transparent), transparent) left / 0.75rem 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in oklab, var(--hp-color-fg) 14%, transparent), transparent) right / 0.75rem 100% no-repeat scroll;
+  background-color: var(--hp-term-ground);
+  scrollbar-color: var(--hp-color-border-strong) transparent;
 }
 
 .hp-term-line {
@@ -913,7 +925,13 @@ input.hp-field:disabled {
 }
 
 .hp-term-result > .hp-term-body {
+  --hp-term-ground: var(--hp-color-bg);
   padding-block-start: 0;
+}
+
+/* A terminal that is only what a command printed has no bar of its own. */
+.hp-term > .hp-term-result:first-child {
+  border-radius: inherit;
 }
 
 .hp-term-result-label {
@@ -954,6 +972,7 @@ input.hp-field:disabled {
   min-inline-size: 0;
   padding: var(--hp-space-3) var(--hp-space-2);
   overflow-x: auto;
+  container-type: inline-size;
   border-radius: var(--hp-radius-lg);
   background: var(--hp-color-surface);
   box-shadow: inset 0 0 0 1px var(--hp-color-border);
@@ -1061,6 +1080,23 @@ input.hp-field:disabled {
   padding-inline-start: var(--hp-space-4);
   font-family: var(--hp-font-sans);
   font-size: var(--hp-text-xs);
+  text-align: end;
+  white-space: normal;
+}
+
+/* In a narrow tree a note goes under its name, lined up with the name. */
+@container (max-width: 30rem) {
+  .hp-tree-row:has(.hp-tree-note) {
+    flex-wrap: wrap;
+    row-gap: 0;
+    padding-block: var(--hp-space-1);
+  }
+  .hp-tree-note {
+    flex-basis: 100%;
+    margin-inline-start: calc(1em + var(--hp-space-2));
+    padding-inline-start: 0;
+    text-align: start;
+  }
 }
 
 /* ---- The editor -------------------------------------------------------------
@@ -1256,7 +1292,7 @@ input.hp-field:disabled {
 
    A reference table: the first column (the name being described) takes the
    room its content needs on one line, and the prose columns share the
-   rest. Rows are parted by a hairline, the head is small and muted, and
+   rest. With three or more columns the name may break where it offers to. Rows are parted by a hairline, the head is small and muted, and
    cells sit on their first line's baseline. Wrap it in .hp-table-scroll:
    the table scrolls rather than squeezing, and in a column under 40rem it
    stacks, each row a block and each cell after the first naming its column
@@ -1308,6 +1344,12 @@ input.hp-field:disabled {
 
 .hp-table :is(th, td):first-child {
   white-space: nowrap;
+}
+
+/* With three or more columns one line is too much to give the name: it
+   breaks where its content offers a break (a <wbr> after a slash, say). */
+.hp-table:has(th:nth-child(3), td:nth-child(3)) :is(th, td):first-child {
+  white-space: normal;
 }
 
 .hp-table td:first-child {
