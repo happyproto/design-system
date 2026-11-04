@@ -20,7 +20,10 @@ concurrency:
 
 jobs:
   release:
-    runs-on: depot-ubuntu-24.04
+    # GitHub-hosted, not Depot: npm verifies the provenance statement and
+    # refuses one from a self-hosted runner (E422 "Unsupported GitHub Actions
+    # runner environment"). The repo is public, so this runner is free.
+    runs-on: ubuntu-latest
     permissions:
       contents: write # push the tag, cut the release
       issues: write # comment on released issues
