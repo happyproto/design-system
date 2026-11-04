@@ -1,9 +1,12 @@
 name: Release
 
 # semantic-release owns versioning: it reads the conventional commits since the
-# last tag, decides the bump, writes package.json and CHANGELOG.md, tags, and
-# publishes. There is deliberately no tag trigger — a human pushing a tag would
-# race the tool for control of the version.
+# last tag, decides the bump, tags, publishes and cuts the GitHub release. It
+# commits nothing back: main is protected, so the version in package.json and
+# CHANGELOG.md is stamped only into what is published, and the tag and the
+# GitHub release are the record of each version. There is deliberately no tag
+# trigger — a human pushing a tag would race the tool for control of the
+# version.
 on:
   push:
     branches: [main]
@@ -19,7 +22,7 @@ jobs:
   release:
     runs-on: depot-ubuntu-24.04
     permissions:
-      contents: write # commit package.json + CHANGELOG, push the tag, cut the release
+      contents: write # push the tag, cut the release
       issues: write # comment on released issues
       pull-requests: write # comment on released pull requests
       id-token: write # OIDC trusted publishing, and provenance attestation
