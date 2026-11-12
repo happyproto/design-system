@@ -78,6 +78,7 @@ const EXPECTED_TOKENS = [
   "--hp-color-accent-alt-fg",
   "--hp-color-accent-alt-surface",
   "--hp-color-accent-alt-surface-fg",
+  "--hp-color-brand-mark",
   "--hp-color-success",
   "--hp-color-warning",
   "--hp-color-danger",
@@ -122,6 +123,12 @@ const EXPECTED_TOKENS = [
   "--hp-radius-sm",
   "--hp-radius-md",
   "--hp-radius-lg",
+  "--hp-frame-rail",
+  "--hp-frame-cross",
+  "--hp-pattern-hatch",
+  "--hp-pattern-hex",
+  "--hp-pattern-hex-size",
+  "--hp-pattern-hex-ratio",
   "--hp-z-dropdown",
   "--hp-z-sticky",
   "--hp-z-modal-backdrop",
@@ -130,7 +137,11 @@ const EXPECTED_TOKENS = [
   "--hp-z-tooltip",
   "--hp-motion-duration-fast",
   "--hp-motion-duration-base",
+  "--hp-motion-duration-slow",
+  "--hp-motion-duration-flourish",
   "--hp-motion-ease",
+  "--hp-motion-ease-in-out",
+  "--hp-motion-stagger",
 ];
 
 /** The color subset of the above, as bare keys (`bg`, `chart-1`). */
@@ -224,9 +235,27 @@ describe("tokens", () => {
   });
 
   test("every required token group is present", () => {
-    for (const group of ["color", "shadow", "font", "space", "radius", "motion"]) {
+    for (const group of ["color", "shadow", "font", "space", "radius", "frame", "pattern", "motion"]) {
       expect(Object.keys(tokens)).toContain(group);
     }
+  });
+
+  test("the CSS and TypeScript sources agree on every chassis and motion value", () => {
+    // The colour-value test above covers colours only. The chassis and motion
+    // tokens are new public values that a JS consumer (a canvas, a chart
+    // library) may read from `tokens`, so pin those values too.
+    const root = declarations(extractBlock(css, ":root"));
+    const groups = ["frame", "pattern", "motion"] as const;
+    const mismatched: Record<string, { ts: string; css: string }> = {};
+    for (const group of groups) {
+      const entries = tokens[group] as Record<string, string>;
+      expect(Object.keys(entries).length, `tokens.${group}`).toBeGreaterThan(0);
+      for (const [key, ts] of Object.entries(entries)) {
+        const name = `--hp-${group}-${key}`;
+        if (root[name] !== ts) mismatched[name] = { ts, css: root[name] ?? "(absent)" };
+      }
+    }
+    expect(mismatched).toEqual({});
   });
 
   test("the dark theme overrides every color the light theme defines", () => {

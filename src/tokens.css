@@ -1,7 +1,7 @@
 /* HappyProto design tokens.
  *
  * Token NAMES are the public API; renaming one is a major version.
- * Every color here is gated by tests/contrast.test.ts — see docs/colour-constraints.md.
+ * Every color here is gated by tests/contrast.test.ts — see docs/color-constraints.md.
  *
  * Theming follows the system by default; an explicit data-theme wins:
  *   <html data-theme="dark">   forces dark
@@ -28,6 +28,9 @@
   --hp-color-accent-alt-fg: oklch(1 0 0);
   --hp-color-accent-alt-surface: oklch(0.787 0.171 69.1);
   --hp-color-accent-alt-surface-fg: oklch(0.20 0 0);
+  /* The logotype's cyan (#2fcdfb), for marks only: 1.87:1 on white, so never
+     text and never a fill that carries text. Same in both themes. */
+  --hp-color-brand-mark: oklch(0.79 0.138 223.1);
   --hp-color-success: oklch(0.426 0.11 150);
   --hp-color-warning: oklch(0.442 0.088 75);
   --hp-color-danger: oklch(0.46 0.175 25);
@@ -85,6 +88,33 @@
   --hp-radius-md: 6px;
   --hp-radius-lg: 10px;
 
+  /* The chassis: the page drawn as a technical drawing (.hp-frame, .hp-rule)
+     and the two textures behind it. A rail is the hairline down each side of
+     a frame; the cross is the "+" where a rule meets a rail. The cross and
+     the rail must both be odd or both be even, so the arms land on whole
+     pixels: an 11px cross on a 1px rail puts each arm at 5px, but on a 2px
+     rail at 4.5px. Change one, change the other. The cross is a fixed 11px
+     rather than calc(var(--hp-space-3) - 1px), which it equals at the
+     default 16px root, because a rem-based step stops being a whole odd
+     number as soon as the root size or space-3 changes.
+
+     The patterns are MASKS, not paint: black where a line is drawn, clear
+     elsewhere. Put a token colour on a pseudo-element's background and mask
+     it with one, so the colour stays a token and follows the theme:
+       background: var(--hp-color-border);
+       mask-image: var(--hp-pattern-hatch);
+     The hex tile is 5rem across (2.5 x space-8), and a pointy-top honeycomb
+     repeats every sqrt(3) x its width, so size it
+       mask-size: var(--hp-pattern-hex-size)
+                  calc(var(--hp-pattern-hex-size) * var(--hp-pattern-hex-ratio));
+     Never put a pattern behind text: strips, gutters and empty fields only. */
+  --hp-frame-rail: 1px;
+  --hp-frame-cross: 11px;
+  --hp-pattern-hatch: repeating-linear-gradient(45deg, transparent 0 6px, rgb(0 0 0) 6px 7px);
+  --hp-pattern-hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 96.995' preserveAspectRatio='none'%3E%3Cpath d='M28 0 56 16.166V48.497L28 64.663 0 48.497V16.166ZM28 64.663V96.995' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E");
+  --hp-pattern-hex-size: 5rem;
+  --hp-pattern-hex-ratio: 1.7320508;
+
   /* Semantic layers. Never write an arbitrary z-index. */
   --hp-z-dropdown: 10;
   --hp-z-sticky: 20;
@@ -93,9 +123,22 @@
   --hp-z-toast: 50;
   --hp-z-tooltip: 60;
 
+  /* Motion. fast: hovers and colour. base: small state changes. slow: a
+     reveal. flourish: a one-off moment, such as the logo answering a hover.
+     stagger: the step between items revealed in sequence. `ease` for things
+     arriving, `ease-in-out` for things that leave and come back.
+
+     The Once Rule: nothing animates forever. A decorative motion plays once
+     per trigger; only a loading indicator may loop, and only while loading.
+     Every transition and animation has a prefers-reduced-motion alternative.
+     tests/components.test.ts enforces both for components.css. */
   --hp-motion-duration-fast: 120ms;
   --hp-motion-duration-base: 200ms;
+  --hp-motion-duration-slow: 400ms;
+  --hp-motion-duration-flourish: 600ms;
   --hp-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --hp-motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --hp-motion-stagger: 40ms;
 }
 
 /* Follow the system, unless light is explicitly pinned. */
@@ -118,6 +161,7 @@
     --hp-color-accent-alt-fg: oklch(0.12 0 0);
     --hp-color-accent-alt-surface: oklch(0.28 0.057 69.1);
     --hp-color-accent-alt-surface-fg: oklch(0.97 0 0);
+    --hp-color-brand-mark: oklch(0.79 0.138 223.1);
     --hp-color-success: oklch(0.70 0.11 150);
     --hp-color-warning: oklch(0.716 0.11 75);
     --hp-color-danger: oklch(0.726 0.12 25);
@@ -159,6 +203,7 @@
   --hp-color-accent-alt-fg: oklch(0.12 0 0);
   --hp-color-accent-alt-surface: oklch(0.28 0.057 69.1);
   --hp-color-accent-alt-surface-fg: oklch(0.97 0 0);
+  --hp-color-brand-mark: oklch(0.79 0.138 223.1);
   --hp-color-success: oklch(0.70 0.11 150);
   --hp-color-warning: oklch(0.716 0.11 75);
   --hp-color-danger: oklch(0.726 0.12 25);

@@ -23,6 +23,7 @@ export const tokens = {
     "accent-alt-fg": "oklch(1 0 0)",
     "accent-alt-surface": "oklch(0.787 0.171 69.1)",
     "accent-alt-surface-fg": "oklch(0.20 0 0)",
+    "brand-mark": "oklch(0.79 0.138 223.1)",
     success: "oklch(0.426 0.11 150)",
     warning: "oklch(0.442 0.088 75)",
     danger: "oklch(0.46 0.175 25)",
@@ -84,6 +85,16 @@ export const tokens = {
     md: "6px",
     lg: "10px",
   },
+  frame: {
+    rail: "1px",
+    cross: "11px",
+  },
+  pattern: {
+    hatch: "repeating-linear-gradient(45deg, transparent 0 6px, rgb(0 0 0) 6px 7px)",
+    hex: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 96.995' preserveAspectRatio='none'%3E%3Cpath d='M28 0 56 16.166V48.497L28 64.663 0 48.497V16.166ZM28 64.663V96.995' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E\")",
+    "hex-size": "5rem",
+    "hex-ratio": "1.7320508",
+  },
   z: {
     dropdown: "10",
     sticky: "20",
@@ -95,7 +106,11 @@ export const tokens = {
   motion: {
     "duration-fast": "120ms",
     "duration-base": "200ms",
+    "duration-slow": "400ms",
+    "duration-flourish": "600ms",
     ease: "cubic-bezier(0.22, 1, 0.36, 1)",
+    "ease-in-out": "cubic-bezier(0.65, 0, 0.35, 1)",
+    stagger: "40ms",
   },
 } as const;
 

@@ -9,6 +9,13 @@
  *   means a visibly heavier line everywhere the system draws one. That is a
  *   design call for the palette task, not a number this suite should set on
  *   its own.
+ *
+ *   `brand-mark` (1.87:1 against the light background) carries no contrast
+ *   assertion either. It is the logotype's cyan, kept for marks only: a hex
+ *   glyph, a tick, a decorative outline, always aria-hidden and never the
+ *   only carrier of meaning. It cannot be text in the light theme, and the
+ *   test below pins it to the logotype instead, so it stays the brand colour
+ *   rather than drifting toward something that merely looks readable.
  */
 import { describe, expect, test } from "bun:test";
 import {
@@ -138,6 +145,7 @@ const COLOUR_KEYS = [
   "accent-alt-fg",
   "accent-alt-surface",
   "accent-alt-surface-fg",
+  "brand-mark",
   "success",
   "warning",
   "danger",
@@ -378,5 +386,32 @@ describe.each(Object.entries(themes))("%s theme", (name, c) => {
       worst.distance,
       `closest pair under ${worst.deficiency}: ${worst.pair}`,
     ).toBeGreaterThanOrEqual(0.09);
+  });
+});
+
+describe("brand mark", () => {
+  test("is the logotype's own cyan, in both themes", () => {
+    // The token exists so the brand's most visible colour has a name. If the
+    // logotype's fill and the token disagree, one of them is wrong.
+    for (const file of ["logotype.light.svg", "logotype.dark.svg"]) {
+      const svg = readFileSync(
+        new URL(`../src/assets/${file}`, import.meta.url),
+        "utf8",
+      );
+      const fills = new Set(
+        [...svg.matchAll(/#[0-9a-fA-F]{6}\b/g)]
+          .map((m) => m[0].toLowerCase())
+          .filter((hex) => toOklab(parse(hex))!.b < -0.05),
+      );
+      // Exactly one cyan in each file: the mark. Black, white and greys have
+      // b near zero and fall out of the filter.
+      expect([...fills], file).toHaveLength(1);
+      for (const [name, c] of Object.entries(themes)) {
+        expect(
+          oklabDistance(c["brand-mark"], [...fills][0]!),
+          `${name} brand-mark vs ${file}`,
+        ).toBeLessThan(0.002);
+      }
+    }
   });
 });
