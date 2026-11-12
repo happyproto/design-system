@@ -7,7 +7,7 @@ colour-vision separation.
 
 Tokens — colours, type, spacing, radii, shadows, motion and a semantic z-index
 scale — and one stylesheet of the components happyproto.at and the dashboard
-both draw: buttons, links, tags, fields, the mono label, the logotype, the
+both draw: buttons, links, tags, fields, the label, the logotype, the
 technical-drawing frame and the honeycomb backdrop. Plain CSS, no framework.
 The stories exist to prove the language works on
 real surfaces — a twelve-column matrix at AAA contrast in dark mode is where a
@@ -106,14 +106,14 @@ import "@happyview/design-system/components.css";
 | `hp-button` | Secondary button; add `hp-button-primary` (the one filled button on a screen), `hp-button-danger`, `hp-button-quiet` or `hp-button-small` |
 | `hp-link` | A link in the accent, underlined |
 | `hp-tag` | A chip in the mono; `data-tone` is `brand`, `alt`, `accent`, `success`, `danger` or `soon` |
-| `hp-label` | A small mono label in the muted ink |
+| `hp-label` | A small label in the sans and the muted ink |
 | `hp-field` | An input, or a box holding one with `hp-field-affix` parts beside it |
 | `hp-logotype` | The logotype; pair `hp-logotype-on-light` and `hp-logotype-on-dark` and it follows the theme |
 | `hp-frame` / `hp-rule` | A column with rails, and a hairline across it with a `+` at each rail; `hp-rule-bleed` runs it past the rails |
 | `hp-honeycomb` | The honeycomb backdrop behind a block |
 | `hp-window` | The product's panel: `hp-window-bar` holding an `hp-window-title` and `hp-window-meta`, then `hp-window-body`; `data-tone="danger"` rings it in the danger ink. Lifted in dark, as on the site |
 | `hp-state` | A status in the mono after a 1em mark; `data-state` is `live`, `done`, `running`, `pending`, `failed` or `idle` |
-| `hp-figure` | A measurement in the mono, tabular; `data-size="lg"` for the one a panel is about, `hp-figure-unit` for its unit |
+| `hp-figure` | A measurement in the sans at medium weight, tabular; `data-size="lg"` for the one a panel is about, `hp-figure-unit` for its unit |
 | `hp-term` | A terminal session: `hp-term-bar` (an `hp-term-title` and an `hp-term-copy` button), then `hp-term-body` holding `hp-term-line`s: `hp-term-cmd` (after a `$` that is never copied), `hp-term-comment`, `hp-term-out`, or a `data-state` of `done`, `warning` or `failed`; `hp-term-result` for what came back. Follows the theme |
 | `hp-tree` | A project's files: `hp-tree-row`s in nested lists, `data-kind="dir"` on a folder's (a `<summary>` to open and close it), `data-type` of `script`, `config` or `data` on a file's; `hp-tree-fold`, `hp-tree-dim`, `hp-tree-note`; `aria-current` on the file the text is about |
 | `hp-editor` | A file open on the page: `hp-editor-pane` with `hp-editor-tabs`, an `hp-editor-tab` (same `data-type`), `hp-editor-path` and `hp-editor-body`; an `hp-tree` before the pane puts the project beside it |
@@ -188,33 +188,9 @@ spread turns out to *be* the protection, because simulation collapses hue —
 which is also why chart vibrancy has a ceiling here, and it is an accessibility
 limit rather than a matter of taste.
 
-See [`docs/colour-constraints.md`](docs/colour-constraints.md) for the exact
+See [`docs/color-constraints.md`](docs/color-constraints.md) for the exact
 bars, the room left inside them, and the two things arithmetic has already
 settled about the palette.
-
-## Releases
-
-Automated with [semantic-release](https://semantic-release.gitbook.io/) on
-every merge to `main`. Do not bump the version by hand and do not push tags —
-semantic-release owns both, and a hand-pushed tag races it for control of the
-version.
-
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-| Prefix | Bump | Use for |
-| --- | --- | --- |
-| `fix:` | patch | a token value corrected, a gate tightened |
-| `feat:` | minor | a token added — additive, so never breaking |
-| `feat!:` or a `BREAKING CHANGE:` footer | major | a token **renamed or removed** |
-
-That table is the versioning rule from above, mechanised: token names are the
-public API, so renaming one is the thing that has to be a major.
-
-Publishing authenticates by OIDC trusted publishing — there is no `NPM_TOKEN`
-— which also means provenance attestations are generated automatically. The
-trusted publisher on npmjs.com is registered against this repository *and this
-workflow filename*, so renaming `.github/workflows/publish.yml` breaks
-releases until the publisher is updated to match.
 
 ## Releases
 

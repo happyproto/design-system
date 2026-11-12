@@ -1,7 +1,7 @@
 /* HappyProto shared components.
  *
  * The pieces happyproto.at and the dashboard both draw: buttons, links,
- * tags, fields, the mono label, the logotype, the technical-drawing frame
+ * tags, fields, the label, the logotype, the technical-drawing frame
  * (rails, rules and their "+" marks), the honeycomb backdrop, and the
  * product's own vocabulary: the window, its states and its figures. Then
  * the workbench the docs draw: the terminal, the file tree, the editor,
@@ -223,14 +223,17 @@
   color: var(--hp-color-fg-muted);
 }
 
-/* ---- The mono label -------------------------------------------------------
+/* ---- The label ------------------------------------------------------------
 
-   A small label in the mono and the muted ink, sentence case, untracked: a
-   panel's name and its count, an identifier's kind. A label, not a claim,
-   so it never stands above a heading as a kicker. */
+   A small label in the sans and the muted ink, sentence case, untracked: a
+   panel's name and its count, an identifier's kind, the name above a
+   figure. A label, not a claim, so it never stands above a heading as a
+   kicker. It is in the sans so it reads as a different kind of text from
+   the figure or identifier under it; the mono is kept for what the machine
+   says (identifiers, hashes, commands) and for a window's title. */
 .hp-label {
   margin: 0;
-  font-family: var(--hp-font-mono);
+  font-family: var(--hp-font-sans);
   font-size: var(--hp-text-sm);
   font-weight: var(--hp-weight-regular);
   line-height: var(--hp-leading-snug);
@@ -674,14 +677,15 @@ input.hp-field:disabled {
 
 /* ---- Figures ----------------------------------------------------------------
 
-   A measurement: the mono at its medium weight, tabular, in the ink, so a
-   column of them aligns and a figure that updates never jitters. A label
+   A measurement: the sans at its medium weight, tabular, in the ink, so a
+   column of them aligns and a figure that updates never jitters (DESIGN.md's
+   Data role). A label
    (.hp-label) above it, a unit or a denominator after it in the muted ink
    (.hp-figure-unit). Title size by default; `data-size="lg"` for the one
    figure a panel is about. */
 .hp-figure {
   margin: 0;
-  font-family: var(--hp-font-mono);
+  font-family: var(--hp-font-sans);
   font-size: var(--hp-text-xl);
   font-weight: var(--hp-weight-medium);
   font-variant-numeric: var(--hp-font-numeric);
