@@ -1,3 +1,8 @@
+.impeccable
+docs/superpowers
+DESIGN.md
+PRODUCT.md
+
 node_modules/
 dist/
 storybook-static/

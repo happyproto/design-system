@@ -1,0 +1,28 @@
+/* Storybook only: never copied to happyproto.at.
+ *
+ * Storybook's theme toolbar sets data-theme, which the page's <picture> media
+ * queries can't see, so the stories keep two logos and show one. The logotype files are named for their ink: .dark has
+ * dark "Proto" and sits on light grounds; .light has white "Proto" and sits
+ * on dark grounds.
+ */
+
+.mk-logo-on-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .mk-logo-on-light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .mk-logo-on-dark {
+    display: block;
+  }
+}
+
+[data-theme="dark"] .mk-logo-on-light {
+  display: none;
+}
+
+[data-theme="dark"] .mk-logo-on-dark {
+  display: block;
+}
