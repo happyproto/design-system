@@ -79,6 +79,11 @@ wants 3:1 where a border is the sole means of conveying a boundary, and
 reaching that means a visibly heavier line. That is a design decision, not a
 number to set from a test file — but it IS a decision, so make it knowingly.
 
+`brand-mark` (1.87:1 on the light background) is unenforced too, on purpose.
+It is the logotype's cyan, kept for decorative marks that are `aria-hidden`
+and never carry meaning alone. It is pinned to the logotype files instead, so
+it stays the brand colour rather than drifting toward a readable one.
+
 ## A note on the AA/AAA difference
 
 General frontend guidance, including the `impeccable` skill's, targets WCAG AA

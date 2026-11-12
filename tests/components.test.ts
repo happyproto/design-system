@@ -76,4 +76,50 @@ describe("components.css", () => {
       expect(line).toMatch(/--hp-honeycomb-fade|mask/);
     }
   });
+
+  /**
+   * The Once Rule (tokens.css, motion): nothing in the shared components
+   * animates forever. A loading indicator is the only thing that may loop,
+   * and there is none here yet; add it to this list on purpose if one comes.
+   */
+  test("loops no animation (the Once Rule)", () => {
+    const LOOPS_ALLOWED: string[] = [];
+    const looping: string[] = [];
+    for (const rule of components.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (/\binfinite\b/.test(rule[2]!)) {
+        const selector = rule[1]!.trim();
+        if (!LOOPS_ALLOWED.includes(selector)) looping.push(selector);
+      }
+    }
+    expect(looping).toEqual([]);
+  });
+
+  test("every transition or animation stops under reduced motion", () => {
+    const reduced = /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/.exec(components);
+    expect(reduced, "a prefers-reduced-motion: reduce block").not.toBeNull();
+    // The body of that block, by brace depth.
+    let depth = 0;
+    let end = reduced!.index + reduced![0].length - 1;
+    for (; end < components.length; end++) {
+      if (components[end] === "{") depth++;
+      else if (components[end] === "}" && --depth === 0) break;
+    }
+    const body = components.slice(reduced!.index + reduced![0].length, end);
+    const stopped = new Set<string>();
+    for (const rule of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/\b(?:transition|animation)\s*:\s*none\b/.test(rule[2]!)) continue;
+      for (const sel of rule[1]!.split(",")) stopped.add(sel.trim());
+    }
+    const outside = components.slice(0, reduced!.index) + components.slice(end + 1);
+    const moving: string[] = [];
+    for (const rule of outside.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/\b(?:transition|animation)(?:-[a-z-]+)?\s*:\s*(?!none\b)/.test(rule[2]!)) continue;
+      for (const sel of rule[1]!.split(",")) {
+        const name = sel.trim();
+        if (!stopped.has(name)) moving.push(name);
+      }
+    }
+    expect(stopped.size).toBeGreaterThan(0);
+    expect(moving).toEqual([]);
+  });
 });

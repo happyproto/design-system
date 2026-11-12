@@ -5,8 +5,8 @@ colour-vision separation.
 
 **[Browse the Storybook →](https://happyproto.github.io/design-system/)**
 
-Tokens — colours, type, spacing, radii, shadows, motion and a semantic z-index
-scale — and one stylesheet of the components happyproto.at and the dashboard
+Tokens — colours, type, spacing, radii, the frame and its patterns, shadows,
+motion and a semantic z-index scale — and one stylesheet of the components happyproto.at and the dashboard
 both draw: buttons, links, tags, fields, the mono label, the logotype, the
 technical-drawing frame and the honeycomb backdrop. Plain CSS, no framework.
 The stories exist to prove the language works on
@@ -48,6 +48,42 @@ import { tokens } from "@happyview/design-system";
 
 tokens.color.accent; // "oklch(0.432 0.076 223.1)"
 ```
+
+### The brand mark, the chassis and motion
+
+- **`--hp-color-brand-mark`** is the logotype's cyan (`#2fcdfb`). It is 1.87:1
+  on white, so it is for marks only: a hex glyph, a tick, a decorative
+  outline, `aria-hidden` and never the only carrier of meaning. Never text,
+  and never a fill that carries text. A test pins it to the logotype files.
+- **The chassis.** `--hp-frame-rail` (1px) and `--hp-frame-cross` (11px) size
+  the frame's rails and "+" marks. `--hp-pattern-hatch` and `--hp-pattern-hex`
+  are **masks**, not paint: put a token colour on a pseudo-element and mask
+  it, so the colour stays a token and follows the theme.
+
+  ```css
+  .changing::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--hp-color-border-strong);
+    mask-image: var(--hp-pattern-hatch);
+  }
+  .field::before {
+    /* … */
+    mask-image: var(--hp-pattern-hex);
+    mask-size: var(--hp-pattern-hex-size)
+      calc(var(--hp-pattern-hex-size) * var(--hp-pattern-hex-ratio));
+  }
+  ```
+
+  Never put a pattern behind text. Strips, gutters and empty fields only.
+- **Motion.** Durations `fast` (120ms, hovers), `base` (200ms, state changes),
+  `slow` (400ms, reveals) and `flourish` (600ms, a one-off moment); `ease` for
+  arrivals, `ease-in-out` for things that leave and return; `stagger` (40ms)
+  between items revealed in sequence. **The Once Rule:** nothing animates
+  forever. A decorative motion plays once per trigger, only a loading
+  indicator may loop, and every transition or animation has a
+  `prefers-reduced-motion: reduce` alternative.
 
 `tokens` carries the **light** theme. `tokens.css` is the source of truth for
 theming, and a test asserts every value in the JS mirror matches the `:root`
@@ -138,6 +174,10 @@ the change is made on purpose.
 - Every colour inside the sRGB gamut, asserted rather than assumed — luminance
   is computed on clamped channels, so without this an unrenderable colour is
   silently rescued by the clamp and passes.
+- The brand mark equals the logotype's cyan, in both themes.
+- In `components.css`: no animation loops (the Once Rule), and every
+  transition or animation is switched off under `prefers-reduced-motion:
+  reduce`.
 
 The colour-vision gate exists because a palette that passed every other check
 still collapsed to ΔE 0.06 for a red-green colour-blind viewer. Lightness
