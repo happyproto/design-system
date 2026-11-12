@@ -145,33 +145,9 @@ spread turns out to *be* the protection, because simulation collapses hue —
 which is also why chart vibrancy has a ceiling here, and it is an accessibility
 limit rather than a matter of taste.
 
-See [`docs/colour-constraints.md`](docs/colour-constraints.md) for the exact
+See [`docs/color-constraints.md`](docs/color-constraints.md) for the exact
 bars, the room left inside them, and the two things arithmetic has already
 settled about the palette.
-
-## Releases
-
-Automated with [semantic-release](https://semantic-release.gitbook.io/) on
-every merge to `main`. Do not bump the version by hand and do not push tags —
-semantic-release owns both, and a hand-pushed tag races it for control of the
-version.
-
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-| Prefix | Bump | Use for |
-| --- | --- | --- |
-| `fix:` | patch | a token value corrected, a gate tightened |
-| `feat:` | minor | a token added — additive, so never breaking |
-| `feat!:` or a `BREAKING CHANGE:` footer | major | a token **renamed or removed** |
-
-That table is the versioning rule from above, mechanised: token names are the
-public API, so renaming one is the thing that has to be a major.
-
-Publishing authenticates by OIDC trusted publishing — there is no `NPM_TOKEN`
-— which also means provenance attestations are generated automatically. The
-trusted publisher on npmjs.com is registered against this repository *and this
-workflow filename*, so renaming `.github/workflows/publish.yml` breaks
-releases until the publisher is updated to match.
 
 ## Releases
 
