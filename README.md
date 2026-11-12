@@ -77,6 +77,9 @@ tokens.color.accent; // "oklch(0.432 0.076 223.1)"
   ```
 
   Never put a pattern behind text. Strips, gutters and empty fields only.
+  Unprefixed `mask-image` needs Safari 15.4+, Chrome 120+ or Firefox 53+;
+  below that the masked pseudo-element paints solid, so give it a
+  `@supports (mask-image: none)` guard where an older browser matters.
 - **Motion.** Durations `fast` (120ms, hovers), `base` (200ms, state changes),
   `slow` (400ms, reveals) and `flourish` (600ms, a one-off moment); `ease` for
   arrivals, `ease-in-out` for things that leave and return; `stagger` (40ms)

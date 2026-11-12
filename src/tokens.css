@@ -90,8 +90,11 @@
 
   /* The chassis: the page drawn as a technical drawing (.hp-frame, .hp-rule)
      and the two textures behind it. A rail is the hairline down each side of
-     a frame; the cross is the "+" where a rule meets a rail, a space-3 square
-     less 1px, odd so its 1px arms centre on a 1px rail.
+     a frame; the cross is the "+" where a rule meets a rail. The cross is a
+     fixed 11px rather than calc(var(--hp-space-3) - 1px), which it equals at
+     the default 16px root: it has to be an odd number of whole pixels so its
+     1px arms centre on a 1px rail, and a rem-based step stops being one as
+     soon as the root size or space-3 changes.
 
      The patterns are MASKS, not paint: black where a line is drawn, clear
      elsewhere. Put a token colour on a pseudo-element's background and mask

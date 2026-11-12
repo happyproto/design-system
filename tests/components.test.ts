@@ -78,17 +78,57 @@ describe("components.css", () => {
   });
 
   /**
+   * The two motion tests below and the colour tests above read rules with a
+   * flat regex: a selector, then a body with no braces in it. That is only
+   * sound while components.css stays flat. CSS nesting would hide a rule's
+   * real selector (or a whole nested rule) from them, so nesting fails here
+   * first. At-rules (@media, @supports, ...) may hold rules; rules may not.
+   */
+  test("uses no CSS nesting, so the rule-reading tests stay sound", () => {
+    const nested: string[] = [];
+    const stack: string[] = [];
+    let start = 0;
+    for (let i = 0; i < components.length; i++) {
+      const ch = components[i];
+      if (ch === "{") {
+        const prelude = components.slice(start, i).trim();
+        const parent = stack[stack.length - 1];
+        if (parent !== undefined && !parent.startsWith("@")) nested.push(`${parent} { ${prelude} }`);
+        stack.push(prelude);
+        start = i + 1;
+      } else if (ch === "}") {
+        stack.pop();
+        start = i + 1;
+      } else if (ch === ";") {
+        start = i + 1;
+      }
+    }
+    expect(stack).toEqual([]);
+    expect(nested).toEqual([]);
+    expect(/(^|[\s,{(])&/.test(components), "a nesting selector (&)").toBe(false);
+  });
+
+  /**
    * The Once Rule (tokens.css, motion): nothing in the shared components
-   * animates forever. A loading indicator is the only thing that may loop,
-   * and there is none here yet; add it to this list on purpose if one comes.
+   * animates forever, or for so many runs that it might as well. A loading
+   * indicator is the only thing that may loop, and there is none here yet;
+   * add its selector to LOOPS_ALLOWED on purpose if one comes.
    */
   test("loops no animation (the Once Rule)", () => {
     const LOOPS_ALLOWED: string[] = [];
     const looping: string[] = [];
     for (const rule of components.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      if (/\binfinite\b/.test(rule[2]!)) {
-        const selector = rule[1]!.trim();
-        if (!LOOPS_ALLOWED.includes(selector)) looping.push(selector);
+      const selector = rule[1]!.trim();
+      if (LOOPS_ALLOWED.includes(selector)) continue;
+      for (const decl of rule[2]!.matchAll(/(animation(?:-iteration-count)?)\s*:\s*([^;]+)/g)) {
+        // Drop function arguments (cubic-bezier(0.22, 1, ...), steps(4, end))
+        // so their numbers are not read as an iteration count. What is left
+        // that is a bare, unitless number is a count: durations carry a unit.
+        const value = decl[2]!.replace(/\([^()]*\)/g, "()");
+        const counts = [...value.matchAll(/(?<![\w.-])(\d*\.?\d+)(?![\w.%])/g)].map((m) => Number(m[1]));
+        if (/\binfinite\b/.test(value) || counts.some((n) => n > 1)) {
+          looping.push(`${selector} { ${decl[1]}: ${decl[2]!.trim()} }`);
+        }
       }
     }
     expect(looping).toEqual([]);
@@ -105,21 +145,45 @@ describe("components.css", () => {
       else if (components[end] === "}" && --depth === 0) break;
     }
     const body = components.slice(reduced!.index + reduced![0].length, end);
-    const stopped = new Set<string>();
+    // Which property each selector has stopped: stopping a transition does
+    // nothing for an animation on the same selector, and the reverse.
+    const stopped = new Map<string, Set<string>>();
     for (const rule of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      if (!/\b(?:transition|animation)\s*:\s*none\b/.test(rule[2]!)) continue;
-      for (const sel of rule[1]!.split(",")) stopped.add(sel.trim());
+      for (const decl of rule[2]!.matchAll(/\b(transition|animation)\s*:\s*none\b/g)) {
+        for (const sel of rule[1]!.split(",")) {
+          const name = sel.trim();
+          if (!stopped.has(name)) stopped.set(name, new Set());
+          stopped.get(name)!.add(decl[1]!);
+        }
+      }
     }
     const outside = components.slice(0, reduced!.index) + components.slice(end + 1);
     const moving: string[] = [];
     for (const rule of outside.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      if (!/\b(?:transition|animation)(?:-[a-z-]+)?\s*:\s*(?!none\b)/.test(rule[2]!)) continue;
-      for (const sel of rule[1]!.split(",")) {
-        const name = sel.trim();
-        if (!stopped.has(name)) moving.push(name);
+      const props = new Set(
+        [...rule[2]!.matchAll(/\b(transition|animation)(?:-[a-z-]+)?\s*:\s*(?!none\b)/g)].map((m) => m[1]!),
+      );
+      for (const prop of props) {
+        for (const sel of rule[1]!.split(",")) {
+          const name = sel.trim();
+          if (!stopped.get(name)?.has(prop)) moving.push(`${name}: ${prop}`);
+        }
       }
     }
     expect(stopped.size).toBeGreaterThan(0);
     expect(moving).toEqual([]);
+  });
+
+  /**
+   * The brand mark is 1.87:1 on white (tokens.css): a mark, never text. These
+   * are the properties that would make it text, or the caret in a field.
+   */
+  test("never sets text in the brand mark", () => {
+    const misuse = [
+      ...components.matchAll(
+        /(?<![\w-])(color|-webkit-text-fill-color|caret-color)\s*:\s*[^;}]*--hp-color-brand-mark/g,
+      ),
+    ].map((m) => m[0]);
+    expect(misuse).toEqual([]);
   });
 });
