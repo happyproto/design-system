@@ -5,8 +5,8 @@ colour-vision separation.
 
 **[Browse the Storybook →](https://happyproto.github.io/design-system/)**
 
-Tokens — colours, type, spacing, radii, the frame and its patterns, shadows,
-motion and a semantic z-index scale — and one stylesheet of the components happyproto.at and the dashboard
+Tokens — colours, type, spacing, radii, shadows, motion and a semantic z-index
+scale — and one stylesheet of the components happyproto.at and the dashboard
 both draw: buttons, links, tags, fields, the mono label, the logotype, the
 technical-drawing frame and the honeycomb backdrop. Plain CSS, no framework.
 The stories exist to prove the language works on
