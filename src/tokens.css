@@ -1,7 +1,7 @@
 /* HappyProto design tokens.
  *
  * Token NAMES are the public API; renaming one is a major version.
- * Every color here is gated by tests/contrast.test.ts — see docs/colour-constraints.md.
+ * Every color here is gated by tests/contrast.test.ts — see docs/color-constraints.md.
  *
  * Theming follows the system by default; an explicit data-theme wins:
  *   <html data-theme="dark">   forces dark
@@ -90,11 +90,13 @@
 
   /* The chassis: the page drawn as a technical drawing (.hp-frame, .hp-rule)
      and the two textures behind it. A rail is the hairline down each side of
-     a frame; the cross is the "+" where a rule meets a rail. The cross is a
-     fixed 11px rather than calc(var(--hp-space-3) - 1px), which it equals at
-     the default 16px root: it has to be an odd number of whole pixels so its
-     1px arms centre on a 1px rail, and a rem-based step stops being one as
-     soon as the root size or space-3 changes.
+     a frame; the cross is the "+" where a rule meets a rail. The cross and
+     the rail must both be odd or both be even, so the arms land on whole
+     pixels: an 11px cross on a 1px rail puts each arm at 5px, but on a 2px
+     rail at 4.5px. Change one, change the other. The cross is a fixed 11px
+     rather than calc(var(--hp-space-3) - 1px), which it equals at the
+     default 16px root, because a rem-based step stops being a whole odd
+     number as soon as the root size or space-3 changes.
 
      The patterns are MASKS, not paint: black where a line is drawn, clear
      elsewhere. Put a token colour on a pseudo-element's background and mask

@@ -679,9 +679,8 @@ input.hp-field:disabled {
 
    A measurement: the sans at its medium weight, tabular, in the ink, so a
    column of them aligns and a figure that updates never jitters (DESIGN.md's
-   Data role). A label
-   (.hp-label) above it, a unit or a denominator after it in the muted ink
-   (.hp-figure-unit). Title size by default; `data-size="lg"` for the one
+   Data role). A label (.hp-label) above it, a unit or a denominator after it
+   in the muted ink (.hp-figure-unit). Title size by default; `data-size="lg"` for the one
    figure a panel is about. */
 .hp-figure {
   margin: 0;

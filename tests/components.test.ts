@@ -135,29 +135,41 @@ describe("components.css", () => {
   });
 
   test("every transition or animation stops under reduced motion", () => {
-    const reduced = /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/.exec(components);
-    expect(reduced, "a prefers-reduced-motion: reduce block").not.toBeNull();
-    // The body of that block, by brace depth.
-    let depth = 0;
-    let end = reduced!.index + reduced![0].length - 1;
-    for (; end < components.length; end++) {
-      if (components[end] === "{") depth++;
-      else if (components[end] === "}" && --depth === 0) break;
+    // Every `prefers-reduced-motion: reduce` block, not just the first, and
+    // the rest of the file outside them.
+    const opener = /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{/g;
+    const blocks: Array<[number, number]> = [];
+    for (const m of components.matchAll(opener)) {
+      let depth = 0;
+      let end = m.index! + m[0].length - 1;
+      for (; end < components.length; end++) {
+        if (components[end] === "{") depth++;
+        else if (components[end] === "}" && --depth === 0) break;
+      }
+      blocks.push([m.index!, end]);
     }
-    const body = components.slice(reduced!.index + reduced![0].length, end);
+    expect(blocks.length, "a prefers-reduced-motion: reduce block").toBeGreaterThan(0);
     // Which property each selector has stopped: stopping a transition does
-    // nothing for an animation on the same selector, and the reverse.
+    // nothing for an animation on the same selector, and the reverse. A stop
+    // is `none`, or a zero duration.
+    const STOP = /\b(transition|animation)(?:\s*:\s*none\b|-duration\s*:\s*0(?:m?s)?\s*(?:[;}]|$))/g;
     const stopped = new Map<string, Set<string>>();
-    for (const rule of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      for (const decl of rule[2]!.matchAll(/\b(transition|animation)\s*:\s*none\b/g)) {
-        for (const sel of rule[1]!.split(",")) {
-          const name = sel.trim();
-          if (!stopped.has(name)) stopped.set(name, new Set());
-          stopped.get(name)!.add(decl[1]!);
+    let outside = "";
+    let from = 0;
+    for (const [start, end] of blocks) {
+      outside += components.slice(from, start);
+      from = end + 1;
+      for (const rule of components.slice(start, end).matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+        for (const decl of rule[2]!.matchAll(STOP)) {
+          for (const sel of rule[1]!.split(",")) {
+            const name = sel.trim();
+            if (!stopped.has(name)) stopped.set(name, new Set());
+            stopped.get(name)!.add(decl[1]!);
+          }
         }
       }
     }
-    const outside = components.slice(0, reduced!.index) + components.slice(end + 1);
+    outside += components.slice(from);
     const moving: string[] = [];
     for (const rule of outside.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
       const props = new Set(
@@ -172,6 +184,20 @@ describe("components.css", () => {
     }
     expect(stopped.size).toBeGreaterThan(0);
     expect(moving).toEqual([]);
+  });
+
+  /**
+   * Labels and figures are tabular so a column of them aligns and a figure
+   * that updates never jitters (DESIGN.md, the Tabular Rule). Pin it, since
+   * moving them from the mono to the sans made it load-bearing: the mono
+   * is tabular by construction, the sans is not.
+   */
+  test("sets labels and figures in tabular numbers", () => {
+    for (const selector of [".hp-label", ".hp-figure"]) {
+      const body = new RegExp(String.raw`(?:^|\})\s*${selector.replace(".", "\\.")}\s*\{([^{}]*)\}`).exec(components);
+      expect(body, selector).not.toBeNull();
+      expect(body![1], selector).toMatch(/font-variant-numeric:\s*var\(--hp-font-numeric\)/);
+    }
   });
 
   /**
